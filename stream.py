@@ -1,7 +1,4 @@
 import streamlit as st
-
-st.set_page_config(layout="wide")
-
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -181,7 +178,7 @@ def format_subjects(subjects):
 
     return badges
 
-
+st.set_page_config(layout="wide")
 
 apply_custom_css()
 
@@ -321,39 +318,39 @@ elif tab == "Trends Subject Area":
     st.subheader("Table of Top subjects that have pay attention")
     ui.table(data=skater[skater["Source_Date_Year"] == selectYear][["Subject", "Source_Date_Year", "Count"]].head(slectNumber), maxHeight=300)
 
-elif tab == "Paper Recommendation System":
-    # App title
-    st.markdown("<h1 style='text-align: center;'>📚 Paper Recommendation System</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #666;'>Discover academic papers that match your research interests and provide valuable insights.</p>", unsafe_allow_html=True)
+# elif tab == "Paper Recommendation System":
+#     # App title
+#     st.markdown("<h1 style='text-align: center;'>📚 Paper Recommendation System</h1>", unsafe_allow_html=True)
+#     st.markdown("<p style='text-align: center; color: #666;'>Discover academic papers that match your research interests and provide valuable insights.</p>", unsafe_allow_html=True)
 
 
-    # Query input
-    query = st.text_input("🔍 Enter your research query:")
+#     # Query input
+#     query = st.text_input("🔍 Enter your research query:")
     
-    # Checkboxes for number of results to display
-    k = st.radio(
-        "Select number of results to show",
-        options=[5, 10, 20, 50, 100],
-        index=0,  # Default to 5
-    )
+#     # Checkboxes for number of results to display
+#     k = st.radio(
+#         "Select number of results to show",
+#         options=[5, 10, 20, 50, 100],
+#         index=0,  # Default to 5
+#     )
 
-    if query:
-        # Perform similarity search for the selected k value
-        results = perform_similarity_search(query, model, index, df, k)
+#     if query:
+#         # Perform similarity search for the selected k value
+#         results = perform_similarity_search(query, model, index, df, k)
 
-        st.markdown(f"<h2 style='margin-top: 20px;'>🔎 Recommended Papers ({k} results)</h2>", unsafe_allow_html=True)
-        for result in results:
-            subject_badges = format_subjects(result["subject"])
-            st.markdown(
-                f"""
-                <div class="paper-card">
-                    <div class="paper-title">{result['title']}</div>
-                    <div class="subject-container">{subject_badges}</div>
-                    <div class="paper-abstract">{result['abstract']}</div>
-                    <div style="margin-top: 10px;">
-                        {"<a href='https://doi.org/" + result['doi'] + "' target='_blank' style='text-decoration: none; color: white;'><button>🔗 Visit page</button></a>" if result['doi'] != "" else "<p style='color: #999;'>🚫 No Link available</p>"}
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+#         st.markdown(f"<h2 style='margin-top: 20px;'>🔎 Recommended Papers ({k} results)</h2>", unsafe_allow_html=True)
+#         for result in results:
+#             subject_badges = format_subjects(result["subject"])
+#             st.markdown(
+#                 f"""
+#                 <div class="paper-card">
+#                     <div class="paper-title">{result['title']}</div>
+#                     <div class="subject-container">{subject_badges}</div>
+#                     <div class="paper-abstract">{result['abstract']}</div>
+#                     <div style="margin-top: 10px;">
+#                         {"<a href='https://doi.org/" + result['doi'] + "' target='_blank' style='text-decoration: none; color: white;'><button>🔗 Visit page</button></a>" if result['doi'] != "" else "<p style='color: #999;'>🚫 No Link available</p>"}
+#                     </div>
+#                 </div>
+#                 """,
+#                 unsafe_allow_html=True,
+#             )
