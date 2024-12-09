@@ -8,21 +8,28 @@ import pandas as pd
 import numpy as np
 import math
 import streamlit_shadcn_ui as ui
+from dotenv import load_dotenv
+import os
 
-@st.cache_data
+load_dotenv()
+
+DATABASE_URL = os.getenv('DATABASE_URL')
+
+@st.cache_resource
 def load_data():
-    df = pd.read_pickle("papers.pkl")
-    # client = MongoClient('mongodb+srv://borugojo:gvxYgV2jbqph8Q3e@paperdata.fzbid.mongodb.net/?retryWrites=true&w=majority&appName=paperData')
+    """Load and cache the paper details DataFrame from MongoDB."""
+    # Connect to MongoDB
+    client = MongoClient(DATABASE_URL)  # Adjust the URI if necessary
+    db = client["paperDB"]  # Replace with your MongoDB database name
+    collection = db["paper"]  # Replace with your MongoDB collection name
 
-    # # Select the database
-    # db = client['paperDB']
+    projection = {'Title': 1, 'Abstract': 1, 'Subject':1, 'Doi':1, 'Source.Date.Year':1, 'Authors':1, '_id': 0}
 
-    # # Select the collection 
-    # collection = db['paper']
+    # Fetch all documents from the collection
+    papers = collection.find({}, projection) # You can apply queries if needed'
 
-    # df = pd.json_normalize(list(collection.find({})))
-
-    # df = df.drop(['_id','Source.Title.@xfab-added', 'Source.Title.$'], axis=1)
+    # Convert MongoDB cursor to DataFrame
+    df = pd.DataFrame(papers)
 
     return df
 
