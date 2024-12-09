@@ -5,5 +5,4 @@ spacy
 nltk
 pymongo
 dotenv
-pip install --use-pep517
 pip install --upgrade pip
