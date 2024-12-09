@@ -3,9 +3,6 @@ faiss
 pandas
 sentence_transformers
 spacy
-string
 nltk
-json
 pymongo
 dotenv
-os
