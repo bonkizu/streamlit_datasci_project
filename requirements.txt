@@ -5,5 +5,5 @@ spacy
 nltk
 pymongo
 dotenv
-pip install faiss-cpu --use-pep517
+pip install --use-pep517
 pip install --upgrade pip
