@@ -30,7 +30,7 @@ encore_path = 'en_core_web_sm-3.8.0/'
 nlp = spacy.load(encore_path)
 stop_words = set(stopwords.words("english"))
 
-@st.cache_resource
+@st.cache_data
 def load_data():
     """Load and cache the paper details DataFrame from MongoDB."""
     # Connect to MongoDB
