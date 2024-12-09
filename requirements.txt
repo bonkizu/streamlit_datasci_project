@@ -1,2 +1,2 @@
 faiss-cpu
-sentence_transformers 
+sentence-transformers
