@@ -4,3 +4,4 @@ spacy
 nltk
 pymongo
 python-dotenv
+streamlit-shadcn-ui
