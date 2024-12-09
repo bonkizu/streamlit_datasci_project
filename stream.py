@@ -30,7 +30,7 @@ nltk.download('stopwords')
 nlp = spacy.load(encore_path)
 stop_words = set(stopwords.words("english"))
 
-@st.cache_resource
+# @st.cache_resource
 def load_data():
     """Load and cache the paper details DataFrame from MongoDB."""
     # Connect to MongoDB
@@ -49,17 +49,17 @@ def load_data():
     return df
 
 # Cache FAISS index and SentenceTransformer model (global resources)
-@st.cache_resource
+# @st.cache_resource
 def load_faiss_index():
     """Load and cache the FAISS index."""
     return faiss.read_index("faiss_index.index")
 
-@st.cache_resource
+# @st.cache_resource
 def load_model():
     """Load and cache the SentenceTransformer model."""
     return SentenceTransformer("all-MiniLM-L6-v2")
 
-@st.cache_resource
+# @st.cache_resource
 def load_color_dict():
     with open("color_dict.json", "r") as file:
         return json.load(file)
