@@ -183,6 +183,8 @@ def format_subjects(subjects):
 
 def main():
 
+    print("start")
+
     apply_custom_css()
 
     # Load cached resources
