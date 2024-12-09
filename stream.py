@@ -24,7 +24,7 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 
 encore_path = 'en_core_web_sm-3.8.0/'
 
-# nltk.download('stopwords')
+nltk.download('stopwords')
 
 # Load NLP resources
 nlp = spacy.load(encore_path)
