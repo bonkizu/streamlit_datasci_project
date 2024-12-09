@@ -1,9 +1,9 @@
 streamlit
-faiss-cpu==1.7.2
 pandas
 sentence_transformers
 spacy
 nltk
 pymongo
 dotenv
-pip install --use-pep517
+pip install faiss-cpu --use-pep517
+pip install --upgrade pip
