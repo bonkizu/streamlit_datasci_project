@@ -30,7 +30,7 @@ nltk.download('stopwords')
 nlp = spacy.load(encore_path)
 stop_words = set(stopwords.words("english"))
 
-@st.cache_data
+@st.cache_resource
 def load_data():
     """Load and cache the paper details DataFrame from MongoDB."""
     # Connect to MongoDB
