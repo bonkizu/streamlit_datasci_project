@@ -181,6 +181,8 @@ def format_subjects(subjects):
 
     return badges
 
+print("not main")
+
 def main():
 
     print("start")
