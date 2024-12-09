@@ -1,7 +1,0 @@
-streamlit
-pandas
-sentence_transformers
-spacy
-nltk
-pymongo
-dotenv
