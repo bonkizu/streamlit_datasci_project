@@ -1,2 +1,5 @@
 faiss-cpu
 sentence-transformers
+spacy
+nltk
+pymongo
