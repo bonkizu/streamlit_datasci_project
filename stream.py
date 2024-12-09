@@ -10,16 +10,18 @@ import json
 from pymongo import MongoClient
 from dotenv import load_dotenv
 import os
+import zipfile
 
 load_dotenv()
 
 DATABASE_URL = os.getenv('DATABASE_URL')
 
-spacy.cli.download("en_core_web_sm")
+encore_path = 'en_core_web_sm-3.8.0/'
+
 nltk.download('stopwords')
 
 # Load NLP resources
-nlp = spacy.load("en_core_web_sm")
+nlp = spacy.load(encore_path)
 stop_words = set(stopwords.words("english"))
 
 # Cache DataFrame (serializable)
