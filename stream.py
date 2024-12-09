@@ -26,7 +26,7 @@ def load_data():
     projection = {'Title': 1, 'Abstract': 1, 'Subject':1, 'Doi':1, 'Source.Date.Year':1, 'Authors':1, '_id': 0}
 
     # Fetch all documents from the collection
-    papers = collection.find({}, projection) # You can apply queries if needed'
+    # papers = collection.find({}, projection) # You can apply queries if needed'
 
     # Convert MongoDB cursor to DataFrame
     df = pd.DataFrame(papers)
