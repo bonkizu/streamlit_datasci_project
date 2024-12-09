@@ -45,150 +45,147 @@ def load_data():
 
     return df
 
-# # Cache FAISS index and SentenceTransformer model (global resources)
-# @st.cache_resource
-# def load_faiss_index():
-#     """Load and cache the FAISS index."""
-#     return faiss.read_index("faiss_index.index")
+# Cache FAISS index and SentenceTransformer model (global resources)
+@st.cache_resource
+def load_faiss_index():
+    """Load and cache the FAISS index."""
+    return faiss.read_index("faiss_index.index")
 
-# @st.cache_resource
-# def load_model():
-#     """Load and cache the SentenceTransformer model."""
-#     return SentenceTransformer("all-MiniLM-L6-v2")
+@st.cache_resource
+def load_model():
+    """Load and cache the SentenceTransformer model."""
+    return SentenceTransformer("all-MiniLM-L6-v2")
 
-# @st.cache_resource
-# def load_color_dict():
-#     with open("color_dict.json", "r") as file:
-#         return json.load(file)
+@st.cache_resource
+def load_color_dict():
+    with open("color_dict.json", "r") as file:
+        return json.load(file)
 
-# def preprocess_text(text):
-#     if not isinstance(text, str) or not text:
-#         return ""
+def preprocess_text(text):
+    if not isinstance(text, str) or not text:
+        return ""
 
-#     # Lowercase and remove punctuation
-#     text = text.lower()
-#     text = text.translate(str.maketrans('', '', string.punctuation))
+    # Lowercase and remove punctuation
+    text = text.lower()
+    text = text.translate(str.maketrans('', '', string.punctuation))
 
-#     # Tokenize using spacy and remove stopwords and non-alphabetic tokens
-#     doc = nlp(text)
+    # Tokenize using spacy and remove stopwords and non-alphabetic tokens
+    doc = nlp(text)
 
-#     # Lemmatization (filtering stopwords and non-alphabetic tokens)
-#     lemmatized_words = [
-#         token.lemma_ for token in doc if token.text not in stop_words
-#     ]
+    # Lemmatization (filtering stopwords and non-alphabetic tokens)
+    lemmatized_words = [
+        token.lemma_ for token in doc if token.text not in stop_words
+    ]
 
-#     return ' '.join(lemmatized_words)
+    return ' '.join(lemmatized_words)
 
-# def perform_similarity_search(query, model, index, df, k):
-#     """Perform similarity search using FAISS."""
-#     # Correct spelling and preprocess query
-#     processed_query = preprocess_text(query)
+def perform_similarity_search(query, model, index, df, k):
+    """Perform similarity search using FAISS."""
+    # Correct spelling and preprocess query
+    processed_query = preprocess_text(query)
     
-#     # Embed the query
-#     query_embedding = model.encode([processed_query]).reshape(1, -1).astype("float32")
+    # Embed the query
+    query_embedding = model.encode([processed_query]).reshape(1, -1).astype("float32")
     
-#     # Search in FAISS index
-#     distances, indices = index.search(query_embedding, k)
+    # Search in FAISS index
+    distances, indices = index.search(query_embedding, k)
     
-#     # Collect results
-#     results = []
-#     for i, idx in enumerate(indices[0]):
-#         result = {
-#             "title": df.iloc[idx]["Title"],
-#             "abstract": df.iloc[idx]["Abstract"],
-#             "subject": df.iloc[idx]["Subject"],
-#             "doi": df.iloc[idx].get("Doi", ""),
-#             "distance": distances[0][i],
-#         }
-#         results.append(result)
-#     return results
+    # Collect results
+    results = []
+    for i, idx in enumerate(indices[0]):
+        result = {
+            "title": df.iloc[idx]["Title"],
+            "abstract": df.iloc[idx]["Abstract"],
+            "subject": df.iloc[idx]["Subject"],
+            "doi": df.iloc[idx].get("Doi", ""),
+            "distance": distances[0][i],
+        }
+        results.append(result)
+    return results
 
-# def apply_custom_css():
-#     st.markdown(
-#         """
-#         <style>
-#         body {
-#             font-family: 'Inter', sans-serif;
-#             background-color: #f5f5f7;
-#             color: #333;
-#         }
-#         button {
-#             background-color: #000;
-#             color: white;
-#             border: none;
-#             border-radius: 8px;
-#             padding: 10px 20px;
-#             font-size: 16px;
-#             cursor: pointer;
-#             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-#         }
-#         button:hover {
-#             background-color: #1e40af;
-#         }
-#         .paper-card {
-#             background-color: white;
-#             border-radius: 12px;
-#             padding: 20px;
-#             margin-bottom: 20px;
-#             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-#         }
-#         .paper-title {
-#             font-size: 1.5rem;
-#             font-weight: 600;
-#             margin-bottom: 10px;
-#             color: #000;
-#         }
-#         .paper-abstract {
-#             font-size: 1rem;
-#             line-height: 1.6;
-#             color: #555;
-#             margin-bottom: 15px;
-#         }
-#         .subject-badge {
-#             display: inline-block;
-#             background-color: #2563eb;
-#             color: white;
-#             padding: 5px 10px;
-#             font-size: 0.875rem;
-#             font-weight: 500;
-#             border-radius: 12px;
-#             margin-right: 5px;
-#             margin-top: 5px;
-#         }
-#         .subject-container {
-#             margin-bottom: 15px;
-#         }
-#         </style>
-#         """,
-#         unsafe_allow_html=True,
-#     )
+def apply_custom_css():
+    st.markdown(
+        """
+        <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f7;
+            color: #333;
+        }
+        button {
+            background-color: #000;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        button:hover {
+            background-color: #1e40af;
+        }
+        .paper-card {
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .paper-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #000;
+        }
+        .paper-abstract {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #555;
+            margin-bottom: 15px;
+        }
+        .subject-badge {
+            display: inline-block;
+            background-color: #2563eb;
+            color: white;
+            padding: 5px 10px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: 12px;
+            margin-right: 5px;
+            margin-top: 5px;
+        }
+        .subject-container {
+            margin-bottom: 15px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
-# color_dict = load_color_dict()
+color_dict = load_color_dict()
 
-# def get_badge_color(subject):
-#     """Get color from the dictionary based on the subject."""
-#     return color_dict.get(subject, "#d1d5db")  # Default gray if subject not found
+def get_badge_color(subject):
+    """Get color from the dictionary based on the subject."""
+    return color_dict.get(subject, "#d1d5db")  # Default gray if subject not found
 
-# def format_subjects(subjects):
-#     """Format subjects as badges with colors from color_dict."""
-#     badges = ""
-#     for subject in subjects:
-#         color = get_badge_color(subject.strip())
-#         badges += f'<span class="subject-badge" style="color: black; background-color: rgba({int(color[1:3], 16)}, {int(color[3:5], 16)}, {int(color[5:7], 16)}, 0.5);">{subject.strip()}</span>'
+def format_subjects(subjects):
+    """Format subjects as badges with colors from color_dict."""
+    badges = ""
+    for subject in subjects:
+        color = get_badge_color(subject.strip())
+        badges += f'<span class="subject-badge" style="color: black; background-color: rgba({int(color[1:3], 16)}, {int(color[3:5], 16)}, {int(color[5:7], 16)}, 0.5);">{subject.strip()}</span>'
 
-#     return badges
-
-# st.set_page_config(layout="wide")
-
-# apply_custom_css()
-
-# # Load cached resources
-df = load_data()
-# index = load_faiss_index()
-# model = load_model()
-
+    return badges
 
 st.set_page_config(layout="wide")
+
+apply_custom_css()
+
+# Load cached resources
+df = load_data()
+index = load_faiss_index()
+model = load_model()
 
 st.sidebar.header('Analysis Controls')
 subject_author = df[['Source_Date_Year', 'Authors']].explode(column='Authors').reset_index(drop=True)
