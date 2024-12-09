@@ -178,6 +178,8 @@ def format_subjects(subjects):
 
     return badges
 
+st.set_page_config(layout="wide")
+
 apply_custom_css()
 
 # Load cached resources
