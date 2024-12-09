@@ -1,6 +1,6 @@
 faiss-cpu
 sentence-transformers
-spacy==3.7.2
+spacy
 nltk
 pymongo
 python-dotenv
