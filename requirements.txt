@@ -3,4 +3,4 @@ sentence-transformers
 spacy
 nltk
 pymongo
-dotenv
+python-dotenv
