@@ -33,8 +33,10 @@ def load_dataframe():
     db = client["paperDB"]  # Replace with your MongoDB database name
     collection = db["paper"]  # Replace with your MongoDB collection name
 
+    projection = {'Title': 1, 'Abstract': 1, 'Subject':1, 'Doi':1, '_id': 0}
+
     # Fetch all documents from the collection
-    papers = collection.find()  # You can apply queries if needed
+    papers = collection.find({}, projection).limit(100)  # You can apply queries if needed'
 
     # Convert MongoDB cursor to DataFrame
     df = pd.DataFrame(papers)
