@@ -60,8 +60,6 @@ def load_model():
 def load_color_dict():
     with open("color_dict.json", "r") as file:
         return json.load(file)
-    
-color_dict = load_color_dict()
 
 def preprocess_text(text):
     if not isinstance(text, str) or not text:
@@ -165,9 +163,11 @@ def apply_custom_css():
         unsafe_allow_html=True,
     )
 
+# color_dict = load_color_dict()
+
 def get_badge_color(subject):
     """Get color from the dictionary based on the subject."""
-    return color_dict.get(subject, "#d1d5db")  # Default gray if subject not found
+    return load_color_dict().get(subject, "#d1d5db")  # Default gray if subject not found
 
 def format_subjects(subjects):
     """Format subjects as badges with colors from color_dict."""
