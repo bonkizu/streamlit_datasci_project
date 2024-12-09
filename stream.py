@@ -181,176 +181,179 @@ def format_subjects(subjects):
 
     return badges
 
+def main():
 
+    apply_custom_css()
 
-apply_custom_css()
+    # Load cached resources
+    df = load_data()
+    index = load_faiss_index()
+    model = load_model()
 
-# Load cached resources
-df = load_data()
-index = load_faiss_index()
-model = load_model()
-
-st.sidebar.header('Analysis Controls')
-subject_author = df[['Source_Date_Year', 'Authors']].explode(column='Authors').reset_index(drop=True)
-subject_author['Authors'] = subject_author['Authors'].apply(lambda x : x['Name'])
-subject_author = subject_author.groupby(['Source_Date_Year', 'Authors']).size().reset_index(name='Count')
-subject_author = subject_author.sort_values(by=['Source_Date_Year', 'Count'], ascending=[True, False])
-subject_author = subject_author.reset_index(drop=True)
-
-
-tab = ui.tabs(options=["Paper Recommendation System", "Publications", "Trends Subject Area"], default_value="Paper Recommendation System", key="my_tab_state")
-
-if tab == "Publications":
-    st.header("Publications Frequency")
-    slectNumber = st.sidebar.slider('Select Number of Authors:',min_value=5, max_value=20, value=10, key="my_slider_state", step=1)
-    selectYear = st.sidebar.selectbox("Select Year", options=df["Source_Date_Year"].unique(), key="my_selectbox_state")
-    st.subheader("Number of Publications each Year")
-    fig = px.histogram(df, x="Source_Date_Year",nbins=15, labels={
-            "Source_Date_Year": "Year of Publication",  # เปลี่ยน label ของแกน X
-            "count": "Frequency of Publications"       # เปลี่ยน label ของแกน Y
-    })
-    fig.update_traces(marker=dict(color='#FF3399'))
-    st.plotly_chart(fig)
-    
-    st.subheader("Top Authors that have Published the Most Publications")
-    
-
-    col1,col2,col3 = st.columns(3)
-
-    with col1:
-        myfirst = subject_author[subject_author['Source_Date_Year'] == "2018"]
-        fig = px.bar(myfirst.head(8), x="Authors",y="Count", color="Source_Date_Year")
-        fig.update_traces(marker=dict(color='#FF0000'))
-        st.plotly_chart(fig)
-
-        myfirst = subject_author[subject_author['Source_Date_Year'] == "2021"]
-        fig = px.bar(myfirst.head(8), x="Authors",y="Count", color="Source_Date_Year")
-        fig.update_traces(marker=dict(color='#FF3399'))
-        st.plotly_chart(fig)
-    with col2:
-        mysecond = subject_author[subject_author['Source_Date_Year'] == "2019"]
-        fig1 = px.bar(mysecond.head(8), x="Authors",y="Count", color="Source_Date_Year",)
-        fig1.update_traces(marker=dict(color='#FF8000'))
-        st.plotly_chart(fig1)
-        
-        mysecond = subject_author[subject_author['Source_Date_Year'] == "2022"]
-        fig1 = px.bar(mysecond.head(8), x="Authors",y="Count", color="Source_Date_Year",)
-        fig1.update_traces(marker=dict(color='#00CCCC'))
-        st.plotly_chart(fig1)
-    with col3:
-        mysecond = subject_author[subject_author['Source_Date_Year'] == "2020"]
-        fig1 = px.bar(mysecond.head(8), x="Authors",y="Count", color="Source_Date_Year",)
-        fig1.update_traces(marker=dict(color='#0000FF'))
-        st.plotly_chart(fig1) 
-
-        mysecond = subject_author[subject_author['Source_Date_Year'] == "2023"]
-        fig2 = px.bar(mysecond.head(8), x="Authors",y="Count", color="Source_Date_Year",)
-        fig2.update_traces(marker=dict(color='#D1C62B'))
-        st.plotly_chart(fig2)
-    st.subheader("Table of Top Authors that have Published the Most Publications")
-    ui.table(data=subject_author[subject_author['Source_Date_Year'] == selectYear][["Authors", "Source_Date_Year", "Count"]].head(slectNumber), maxHeight=300)
-
-   
-elif tab == "Trends Subject Area":
-    st.header("Author Publication Trends and Frequencies")
-    slectNumber = st.sidebar.slider('Select Number of Authors:',min_value=5, max_value=20, value=10, key="my_slider_state", step=1)
-    selectYear = st.sidebar.selectbox("Select Year", options=df["Source_Date_Year"].unique(), key="my_selectbox_state")
-    colors = {'setosa': '#FF4B4B', 'versicolor': '#4B4BFF', 'virginica': '#4BFF4B'}
-    
-    subject_author = df[['Source_Date_Year','Subject', 'Authors']].explode(column='Authors').reset_index(drop=True)
+    st.sidebar.header('Analysis Controls')
+    subject_author = df[['Source_Date_Year', 'Authors']].explode(column='Authors').reset_index(drop=True)
     subject_author['Authors'] = subject_author['Authors'].apply(lambda x : x['Name'])
-    subject_author = subject_author.explode(column='Subject')
-    
-    subject_author = subject_author.groupby(['Source_Date_Year', 'Subject', 'Authors']).size().reset_index(name='Count')
+    subject_author = subject_author.groupby(['Source_Date_Year', 'Authors']).size().reset_index(name='Count')
     subject_author = subject_author.sort_values(by=['Source_Date_Year', 'Count'], ascending=[True, False])
     subject_author = subject_author.reset_index(drop=True)
-    subject_author = subject_author[['Source_Date_Year', 'Subject', 'Count']] 
-    
-    skater = subject_author.groupby(['Source_Date_Year' ,'Subject']).size().reset_index(name='Count')
-    skater = skater.sort_values(by=['Count'], ascending=[False])
-    
-    b = skater[skater['Count'] > 1000]
-    b = b.sort_values(by=['Source_Date_Year'], ascending=[False])
-    b = b.reset_index(drop=True)
-    
-    
-    
-    # selectSubject = st.sidebar.selectbox("Select Subject", options=subject_author["Subject"].unique(), key="my_slider_state")
-    fig = px.bar(b, x="Subject",y="Count", color="Source_Date_Year",color_discrete_map=colors, barmode='stack')
-    # fig.update_traces(marker=dict(color='#FF0000'))
-    st.plotly_chart(fig)
-    switch_value = ui.switch(default_checked=True, label="show top subject each year", key="switch1")
-    if switch_value == True:
-        st.header("Top subjects that have pay attention each year")
-        col1,col2,col3 = st.columns(3)
+
+
+    tab = ui.tabs(options=["Paper Recommendation System", "Publications", "Trends Subject Area"], default_value="Paper Recommendation System", key="my_tab_state")
+
+    if tab == "Publications":
+        st.header("Publications Frequency")
+        slectNumber = st.sidebar.slider('Select Number of Authors:',min_value=5, max_value=20, value=10, key="my_slider_state", step=1)
+        selectYear = st.sidebar.selectbox("Select Year", options=df["Source_Date_Year"].unique(), key="my_selectbox_state")
+        st.subheader("Number of Publications each Year")
+        fig = px.histogram(df, x="Source_Date_Year",nbins=15, labels={
+                "Source_Date_Year": "Year of Publication",  # เปลี่ยน label ของแกน X
+                "count": "Frequency of Publications"       # เปลี่ยน label ของแกน Y
+        })
+        fig.update_traces(marker=dict(color='#FF3399'))
+        st.plotly_chart(fig)
         
+        st.subheader("Top Authors that have Published the Most Publications")
+        
+
+        col1,col2,col3 = st.columns(3)
+
         with col1:
-            myfirst = skater[skater['Source_Date_Year'] == "2018"]
-            fig = px.bar(myfirst.head(8), x="Subject",y="Count", color="Source_Date_Year")
+            myfirst = subject_author[subject_author['Source_Date_Year'] == "2018"]
+            fig = px.bar(myfirst.head(8), x="Authors",y="Count", color="Source_Date_Year")
             fig.update_traces(marker=dict(color='#FF0000'))
             st.plotly_chart(fig)
 
-            myfirst = skater[skater['Source_Date_Year'] == "2021"]
-            fig = px.bar(myfirst.head(8), x="Subject",y="Count", color="Source_Date_Year")
+            myfirst = subject_author[subject_author['Source_Date_Year'] == "2021"]
+            fig = px.bar(myfirst.head(8), x="Authors",y="Count", color="Source_Date_Year")
             fig.update_traces(marker=dict(color='#FF3399'))
             st.plotly_chart(fig)
         with col2:
-            mysecond = skater[skater['Source_Date_Year'] == "2019"]
-            fig1 = px.bar(mysecond.head(8), x="Subject",y="Count", color="Source_Date_Year",)
+            mysecond = subject_author[subject_author['Source_Date_Year'] == "2019"]
+            fig1 = px.bar(mysecond.head(8), x="Authors",y="Count", color="Source_Date_Year",)
             fig1.update_traces(marker=dict(color='#FF8000'))
             st.plotly_chart(fig1)
-
-            mysecond = skater[skater['Source_Date_Year'] == "2022"]
-            fig1 = px.bar(mysecond.head(8), x="Subject",y="Count", color="Source_Date_Year",)
+            
+            mysecond = subject_author[subject_author['Source_Date_Year'] == "2022"]
+            fig1 = px.bar(mysecond.head(8), x="Authors",y="Count", color="Source_Date_Year",)
             fig1.update_traces(marker=dict(color='#00CCCC'))
             st.plotly_chart(fig1)
         with col3:
-            mysecond = skater[skater['Source_Date_Year'] == "2020"]
-            fig2 = px.bar(mysecond.head(8), x="Subject",y="Count", color="Source_Date_Year",)
-            fig2.update_traces(marker=dict(color='#0000FF'))
-            st.plotly_chart(fig2)    
+            mysecond = subject_author[subject_author['Source_Date_Year'] == "2020"]
+            fig1 = px.bar(mysecond.head(8), x="Authors",y="Count", color="Source_Date_Year",)
+            fig1.update_traces(marker=dict(color='#0000FF'))
+            st.plotly_chart(fig1) 
 
-            mysecond = skater[skater['Source_Date_Year'] == "2023"]
-            fig1 = px.bar(mysecond.head(8), x="Subject",y="Count", color="Source_Date_Year",)
-            fig1.update_traces(marker=dict(color='#D1C62B'))
-            st.plotly_chart(fig1)
+            mysecond = subject_author[subject_author['Source_Date_Year'] == "2023"]
+            fig2 = px.bar(mysecond.head(8), x="Authors",y="Count", color="Source_Date_Year",)
+            fig2.update_traces(marker=dict(color='#D1C62B'))
+            st.plotly_chart(fig2)
+        st.subheader("Table of Top Authors that have Published the Most Publications")
+        ui.table(data=subject_author[subject_author['Source_Date_Year'] == selectYear][["Authors", "Source_Date_Year", "Count"]].head(slectNumber), maxHeight=300)
 
-    st.subheader("Table of Top subjects that have pay attention")
-    ui.table(data=skater[skater["Source_Date_Year"] == selectYear][["Subject", "Source_Date_Year", "Count"]].head(slectNumber), maxHeight=300)
-
-elif tab == "Paper Recommendation System":
-    # App title
-    st.markdown("<h1 style='text-align: center;'>📚 Paper Recommendation System</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color: #666;'>Discover academic papers that match your research interests and provide valuable insights.</p>", unsafe_allow_html=True)
-
-
-    # Query input
-    query = st.text_input("🔍 Enter your research query:")
     
-    # Checkboxes for number of results to display
-    k = st.radio(
-        "Select number of results to show",
-        options=[5, 10, 20, 50, 100],
-        index=0,  # Default to 5
-    )
+    elif tab == "Trends Subject Area":
+        st.header("Author Publication Trends and Frequencies")
+        slectNumber = st.sidebar.slider('Select Number of Authors:',min_value=5, max_value=20, value=10, key="my_slider_state", step=1)
+        selectYear = st.sidebar.selectbox("Select Year", options=df["Source_Date_Year"].unique(), key="my_selectbox_state")
+        colors = {'setosa': '#FF4B4B', 'versicolor': '#4B4BFF', 'virginica': '#4BFF4B'}
+        
+        subject_author = df[['Source_Date_Year','Subject', 'Authors']].explode(column='Authors').reset_index(drop=True)
+        subject_author['Authors'] = subject_author['Authors'].apply(lambda x : x['Name'])
+        subject_author = subject_author.explode(column='Subject')
+        
+        subject_author = subject_author.groupby(['Source_Date_Year', 'Subject', 'Authors']).size().reset_index(name='Count')
+        subject_author = subject_author.sort_values(by=['Source_Date_Year', 'Count'], ascending=[True, False])
+        subject_author = subject_author.reset_index(drop=True)
+        subject_author = subject_author[['Source_Date_Year', 'Subject', 'Count']] 
+        
+        skater = subject_author.groupby(['Source_Date_Year' ,'Subject']).size().reset_index(name='Count')
+        skater = skater.sort_values(by=['Count'], ascending=[False])
+        
+        b = skater[skater['Count'] > 1000]
+        b = b.sort_values(by=['Source_Date_Year'], ascending=[False])
+        b = b.reset_index(drop=True)
+        
+        
+        
+        # selectSubject = st.sidebar.selectbox("Select Subject", options=subject_author["Subject"].unique(), key="my_slider_state")
+        fig = px.bar(b, x="Subject",y="Count", color="Source_Date_Year",color_discrete_map=colors, barmode='stack')
+        # fig.update_traces(marker=dict(color='#FF0000'))
+        st.plotly_chart(fig)
+        switch_value = ui.switch(default_checked=True, label="show top subject each year", key="switch1")
+        if switch_value == True:
+            st.header("Top subjects that have pay attention each year")
+            col1,col2,col3 = st.columns(3)
+            
+            with col1:
+                myfirst = skater[skater['Source_Date_Year'] == "2018"]
+                fig = px.bar(myfirst.head(8), x="Subject",y="Count", color="Source_Date_Year")
+                fig.update_traces(marker=dict(color='#FF0000'))
+                st.plotly_chart(fig)
 
-    if query:
-        # Perform similarity search for the selected k value
-        results = perform_similarity_search(query, model, index, df, k)
+                myfirst = skater[skater['Source_Date_Year'] == "2021"]
+                fig = px.bar(myfirst.head(8), x="Subject",y="Count", color="Source_Date_Year")
+                fig.update_traces(marker=dict(color='#FF3399'))
+                st.plotly_chart(fig)
+            with col2:
+                mysecond = skater[skater['Source_Date_Year'] == "2019"]
+                fig1 = px.bar(mysecond.head(8), x="Subject",y="Count", color="Source_Date_Year",)
+                fig1.update_traces(marker=dict(color='#FF8000'))
+                st.plotly_chart(fig1)
 
-        st.markdown(f"<h2 style='margin-top: 20px;'>🔎 Recommended Papers ({k} results)</h2>", unsafe_allow_html=True)
-        for result in results:
-            subject_badges = format_subjects(result["subject"])
-            st.markdown(
-                f"""
-                <div class="paper-card">
-                    <div class="paper-title">{result['title']}</div>
-                    <div class="subject-container">{subject_badges}</div>
-                    <div class="paper-abstract">{result['abstract']}</div>
-                    <div style="margin-top: 10px;">
-                        {"<a href='https://doi.org/" + result['doi'] + "' target='_blank' style='text-decoration: none; color: white;'><button>🔗 Visit page</button></a>" if result['doi'] != "" else "<p style='color: #999;'>🚫 No Link available</p>"}
+                mysecond = skater[skater['Source_Date_Year'] == "2022"]
+                fig1 = px.bar(mysecond.head(8), x="Subject",y="Count", color="Source_Date_Year",)
+                fig1.update_traces(marker=dict(color='#00CCCC'))
+                st.plotly_chart(fig1)
+            with col3:
+                mysecond = skater[skater['Source_Date_Year'] == "2020"]
+                fig2 = px.bar(mysecond.head(8), x="Subject",y="Count", color="Source_Date_Year",)
+                fig2.update_traces(marker=dict(color='#0000FF'))
+                st.plotly_chart(fig2)    
+
+                mysecond = skater[skater['Source_Date_Year'] == "2023"]
+                fig1 = px.bar(mysecond.head(8), x="Subject",y="Count", color="Source_Date_Year",)
+                fig1.update_traces(marker=dict(color='#D1C62B'))
+                st.plotly_chart(fig1)
+
+        st.subheader("Table of Top subjects that have pay attention")
+        ui.table(data=skater[skater["Source_Date_Year"] == selectYear][["Subject", "Source_Date_Year", "Count"]].head(slectNumber), maxHeight=300)
+
+    elif tab == "Paper Recommendation System":
+        # App title
+        st.markdown("<h1 style='text-align: center;'>📚 Paper Recommendation System</h1>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; color: #666;'>Discover academic papers that match your research interests and provide valuable insights.</p>", unsafe_allow_html=True)
+
+
+        # Query input
+        query = st.text_input("🔍 Enter your research query:")
+        
+        # Checkboxes for number of results to display
+        k = st.radio(
+            "Select number of results to show",
+            options=[5, 10, 20, 50, 100],
+            index=0,  # Default to 5
+        )
+
+        if query:
+            # Perform similarity search for the selected k value
+            results = perform_similarity_search(query, model, index, df, k)
+
+            st.markdown(f"<h2 style='margin-top: 20px;'>🔎 Recommended Papers ({k} results)</h2>", unsafe_allow_html=True)
+            for result in results:
+                subject_badges = format_subjects(result["subject"])
+                st.markdown(
+                    f"""
+                    <div class="paper-card">
+                        <div class="paper-title">{result['title']}</div>
+                        <div class="subject-container">{subject_badges}</div>
+                        <div class="paper-abstract">{result['abstract']}</div>
+                        <div style="margin-top: 10px;">
+                            {"<a href='https://doi.org/" + result['doi'] + "' target='_blank' style='text-decoration: none; color: white;'><button>🔗 Visit page</button></a>" if result['doi'] != "" else "<p style='color: #999;'>🚫 No Link available</p>"}
+                        </div>
                     </div>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+if __name__ == "__main__":
+    main()
