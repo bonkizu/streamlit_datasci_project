@@ -5,6 +5,7 @@ from sentence_transformers import SentenceTransformer
 import spacy
 import string
 from nltk.corpus import stopwords
+import nltk
 import json
 from pymongo import MongoClient
 from dotenv import load_dotenv
@@ -13,6 +14,9 @@ import os
 load_dotenv()
 
 DATABASE_URL = os.getenv('DATABASE_URL')
+
+spacy.cli.download("en_core_web_sm")
+nltk.download('stopwords')
 
 # Load NLP resources
 nlp = spacy.load("en_core_web_sm")
