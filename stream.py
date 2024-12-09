@@ -1,4 +1,7 @@
 import streamlit as st
+
+st.set_page_config(layout="wide")
+
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -178,7 +181,7 @@ def format_subjects(subjects):
 
     return badges
 
-st.set_page_config(layout="wide")
+
 
 apply_custom_css()
 
