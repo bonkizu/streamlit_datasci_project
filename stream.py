@@ -454,7 +454,22 @@ def main():
 
 
         # Query input
-        query = st.text_input("🔍 Enter your research query:", value="Healthcare")
+        query = st.text_input("🔍 Enter your research query:")
+
+        query_message = st.empty()  # Placeholder for message below search bar
+        if not query:
+            query_message.markdown(
+                """
+                <div style="text-align: center; color: #999; font-size: 16px; font-style: italic;">
+                    🧐 Looking for something specific? 
+                    <br>
+                    Try searching for a topic like 'AI in healthcare' or 'Machine learning research'.
+                </div>
+                """, 
+                unsafe_allow_html=True
+            )
+        else:
+            query_message.empty()  # Clear the message once a query is entered
         
         # Checkboxes for number of results to display
         # k = st.radio(
