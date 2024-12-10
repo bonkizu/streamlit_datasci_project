@@ -51,7 +51,7 @@ def load_data():
     subject_subject = subject_subject.groupby(['Source_Date_Year', 'Subject']).size().reset_index(name='Count')
     subject_subject = subject_subject.sort_values(by=['Source_Date_Year', 'Count'], ascending=[True, False]).reset_index(drop=True)
 
-    print("Load")
+    print("Load Data")
 
     return df, subject_author, subject_subject, collection
 
