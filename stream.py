@@ -81,9 +81,23 @@ def load_index_dict():
     with open("index_id_map.json", "r") as file:
         return json.load(file)
 
-def preprocess_text(text, nlp, stop_words):
+@st.cache_resource
+def load_lang():
+    encore_path = 'en_core_web_sm-3.8.0/'
+
+    nltk.download('stopwords')
+
+    # Load NLP resources
+    nlp = spacy.load(encore_path)
+    stop_words = set(stopwords.words("english"))
+
+    return nlp, stop_words
+
+def preprocess_text(text):
     if not isinstance(text, str) or not text:
         return ""
+    
+    nlp, stop_words = load_lang()
 
     # Lowercase and remove punctuation
     text = text.lower()
@@ -99,10 +113,10 @@ def preprocess_text(text, nlp, stop_words):
 
     return ' '.join(lemmatized_words)
 
-def perform_similarity_search(query, model, index, k, collection, nlp, stop_words):
+def perform_similarity_search(query, model, index, k, collection):
     """Perform similarity search using FAISS."""
     # Correct spelling and preprocess query
-    processed_query = preprocess_text(query, nlp, stop_words)
+    processed_query = preprocess_text(query)
     
     # Embed the query
     query_embedding = model.encode([processed_query]).reshape(1, -1).astype("float32")
@@ -245,14 +259,6 @@ def main():
     index = load_faiss_index()
     model = load_model()
 
-    encore_path = 'en_core_web_sm-3.8.0/'
-
-    nltk.download('stopwords')
-
-    # Load NLP resources
-    nlp = spacy.load(encore_path)
-    stop_words = set(stopwords.words("english"))
-
     years = ["2018", "2019", "2020", "2021", "2022", "2023"]
     colors = ['#FF0000', '#FF8000', '#0000FF', '#FF3399', '#00CCCC', '#D1C62B']
 
@@ -329,7 +335,7 @@ def main():
 
         if query:
             # Perform similarity search for the selected k value
-            results = perform_similarity_search(query, model, index, k, collection, nlp, stop_words)
+            results = perform_similarity_search(query, model, index, k, collection)
 
             st.markdown(f"<h2 style='margin-top: 20px;'>🔎 Recommended Papers ({k} results)</h2>", unsafe_allow_html=True)
             for result in results:
