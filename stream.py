@@ -65,7 +65,6 @@ def load_color_dict():
     with open("color_dict.json", "r") as file:
         return json.load(file)
 
-@st.cache_data
 def preprocess_text(text):
     if not isinstance(text, str) or not text:
         return ""
