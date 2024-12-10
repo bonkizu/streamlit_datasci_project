@@ -457,7 +457,13 @@ def main():
         query = st.text_input("🔍 Enter your research query:")
         
         # Checkboxes for number of results to display
-        k = st.radio(
+        # k = st.radio(
+        #     "Select number of results to show",
+        #     options=[5, 10, 20, 50, 100],
+        #     index=0,  # Default to 5
+        # )
+
+        k = st.sidebar.radio(
             "Select number of results to show",
             options=[5, 10, 20, 50, 100],
             index=0,  # Default to 5
