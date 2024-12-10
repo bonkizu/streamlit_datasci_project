@@ -182,7 +182,7 @@ def format_subjects(subjects):
 
     return badges
 
-@st.cache_data
+# @st.cache_data
 def preprocess_author_data(df):
     """Preprocess data for authors and subjects."""
     # Author data
