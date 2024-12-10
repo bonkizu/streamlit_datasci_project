@@ -196,7 +196,8 @@ def preprocess_author_data(df):
     subject_subject['Authors'] = subject_subject['Authors'].apply(lambda x: x['Name'])
     subject_subject = subject_subject.explode(column='Subject')
     subject_subject = subject_subject.groupby(['Source_Date_Year', 'Subject']).size().reset_index(name='Count')
-    subject_subject = subject_subject.sort_values(by=['Source_Date_Year', 'Count'], ascending=[False]).reset_index(drop=True)
+    subject_subject = subject_subject.sort_values(by=['Source_Date_Year', 'Count'], ascending=[True, False]).reset_index(drop=True)
+
     
     return subject_author, subject_subject
 
