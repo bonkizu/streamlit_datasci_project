@@ -507,43 +507,41 @@ def main():
         st.header("Top Authors' Affiliation City & Country")
 
         # Scatter Plot
-        with st.expander('Scatter Plot Spatial Analysis'):
-            st.subheader('Scatter Plot Spatial Analysis')
+        st.subheader('Scatter Plot Spatial Analysis')
 
-            view_state = pdk.ViewState(latitude=0, longitude=0, zoom=1, pitch=0)
+        view_state = pdk.ViewState(latitude=0, longitude=0, zoom=1, pitch=0)
 
-            scatterplot_layer = pdk.Layer(
-                "ScatterplotLayer",
-                top_affiliation_coordinate_df,
-                get_position=['longitude', 'latitude'],
-                opacity=0.8,
-                get_radius=200000,
-                get_fill_color=[30, 0, 255],
-                pickable=True
-            )
+        scatterplot_layer = pdk.Layer(
+            "ScatterplotLayer",
+            top_affiliation_coordinate_df,
+            get_position=['longitude', 'latitude'],
+            opacity=0.8,
+            get_radius=200000,
+            get_fill_color=[30, 0, 255],
+            pickable=True
+        )
 
-            st.pydeck_chart(pdk.Deck(layers=[scatterplot_layer], initial_view_state=view_state, map_style="light"))
+        st.pydeck_chart(pdk.Deck(layers=[scatterplot_layer], initial_view_state=view_state, map_style="light"))
 
         # Heatmap
-        with st.expander('Heatmap Spatial Analysis'):
-            st.subheader('Heatmap Spatial Analysis')
+        st.subheader('Heatmap Spatial Analysis')
 
-            heatmap_layer = pdk.Layer(
-                "HeatmapLayer",
-                top_affiliation_coordinate_df,
-                get_position=['longitude', 'latitude'],
-                opacity=0.8,
-                get_weight="local_paper_portions",
-                color_range=[
-                    [150, 150, 200],
-                    [80, 80, 200],
-                    [60, 60, 225],
-                    [30, 0, 255]
-                ],
-                pickable=True
-            )
+        heatmap_layer = pdk.Layer(
+            "HeatmapLayer",
+            top_affiliation_coordinate_df,
+            get_position=['longitude', 'latitude'],
+            opacity=0.8,
+            get_weight="local_paper_portions",
+            color_range=[
+                [150, 150, 200],
+                [80, 80, 200],
+                [60, 60, 225],
+                [30, 0, 255]
+            ],
+            pickable=True
+        )
 
-            st.pydeck_chart(pdk.Deck(layers=[heatmap_layer], initial_view_state=view_state, map_style="light"))
+        st.pydeck_chart(pdk.Deck(layers=[heatmap_layer], initial_view_state=view_state, map_style="light"))
 
         # Top Affiliation Table
         st.header('Top Affiliation City & Country Table')
