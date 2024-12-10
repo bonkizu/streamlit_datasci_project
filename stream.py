@@ -454,7 +454,7 @@ def main():
 
 
         # Query input
-        query = st.text_input("🔍 Enter your research query:")
+        query = st.text_input("🔍 Enter your research query:", placeholder="e.g., 'AI in healthcare', 'Machine learning for climate change'...")
 
         query_message = st.empty()  # Placeholder for message below search bar
         if not query:
