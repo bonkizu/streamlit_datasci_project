@@ -18,21 +18,14 @@ from nltk.corpus import stopwords
 import nltk
 import json
 
-load_dotenv()
-
-DATABASE_URL = os.getenv('DATABASE_URL')
-
-encore_path = 'en_core_web_sm-3.8.0/'
-
-nltk.download('stopwords')
-
-# Load NLP resources
-nlp = spacy.load(encore_path)
-stop_words = set(stopwords.words("english"))
-
 @st.cache_resource
 def load_data():
     """Load and cache the paper details DataFrame from MongoDB."""
+
+    load_dotenv()
+
+    DATABASE_URL = os.getenv('DATABASE_URL')
+
     # Connect to MongoDB
     client = MongoClient(DATABASE_URL)  # Adjust the URI if necessary
     db = client["paperDB"]  # Replace with your MongoDB database name
@@ -80,6 +73,14 @@ def load_color_dict():
 def preprocess_text(text):
     if not isinstance(text, str) or not text:
         return ""
+
+    encore_path = 'en_core_web_sm-3.8.0/'
+
+    nltk.download('stopwords')
+
+    # Load NLP resources
+    nlp = spacy.load(encore_path)
+    stop_words = set(stopwords.words("english"))
 
     # Lowercase and remove punctuation
     text = text.lower()
@@ -179,11 +180,9 @@ def apply_custom_css():
         unsafe_allow_html=True,
     )
 
-color_dict = load_color_dict()
-
 def get_badge_color(subject):
     """Get color from the dictionary based on the subject."""
-    return color_dict.get(subject, "#d1d5db")  # Default gray if subject not found
+    return load_color_dict().get(subject, "#d1d5db")  # Default gray if subject not found
 
 def format_subjects(subjects):
     """Format subjects as badges with colors from color_dict."""
@@ -212,8 +211,7 @@ def format_subjects(subjects):
     
 #     return subject_author, subject_subject
 
-years = ["2018", "2019", "2020", "2021", "2022", "2023"]
-colors = ['#FF0000', '#FF8000', '#0000FF', '#FF3399', '#00CCCC', '#D1C62B']
+
 
 
 def main():
@@ -224,6 +222,9 @@ def main():
     df, subject_author, subject_subject = load_data()
     index = load_faiss_index()
     model = load_model()
+
+    years = ["2018", "2019", "2020", "2021", "2022", "2023"]
+    colors = ['#FF0000', '#FF8000', '#0000FF', '#FF3399', '#00CCCC', '#D1C62B']
 
     st.sidebar.header('Analysis Controls')
 
