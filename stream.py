@@ -396,7 +396,7 @@ def main():
 
     st.sidebar.header('Analysis Controls')
 
-    tab = ui.tabs(options=["Paper Recommendation System", "Publications", "Trends Subject Area", "Visualization"], default_value="Paper Recommendation System", key="my_tab_state")
+    tab = ui.tabs(options=["Paper Recommendation System", "Publications", "Trends Subject Area", "Spatial Visualization", "Network Visualization"], default_value="Paper Recommendation System", key="my_tab_state")
     if tab == "Publications":
         st.header("Publications Frequency")
         slectNumber = st.sidebar.slider('Select Number of Authors:', min_value=5, max_value=20, value=10, key="pub_slider_state", step=1)
