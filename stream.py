@@ -17,11 +17,11 @@ import string
 from nltk.corpus import stopwords
 import nltk
 import json
+from bson import ObjectId
 
 @st.cache_resource
 def load_data():
     """Load and cache the paper details DataFrame from MongoDB."""
-
     load_dotenv()
 
     DATABASE_URL = os.getenv('DATABASE_URL')
@@ -31,7 +31,7 @@ def load_data():
     db = client["paperDB"]  # Replace with your MongoDB database name
     collection = db["paper"]  # Replace with your MongoDB collection name
 
-    projection = {'Title': 1, 'Abstract': 1, 'Subject':1, 'Doi':1, 'Source_Date_Year':1, 'Authors':1, '_id': 0}
+    projection = {'Source_Date_Year':1, 'Authors':1, '_id': 0}
 
     # Fetch all documents from the collection
     papers = collection.find({}, projection) # You can apply queries if needed'
@@ -51,7 +51,7 @@ def load_data():
     subject_subject = subject_subject.groupby(['Source_Date_Year', 'Subject']).size().reset_index(name='Count')
     subject_subject = subject_subject.sort_values(by=['Source_Date_Year', 'Count'], ascending=[True, False]).reset_index(drop=True)
 
-    return df, subject_author, subject_subject
+    return df, subject_author, subject_subject, collection
 
 # Cache FAISS index and SentenceTransformer model (global resources)
 @st.cache_resource
@@ -68,6 +68,11 @@ def load_model():
 @st.cache_resource
 def load_color_dict():
     with open("color_dict.json", "r") as file:
+        return json.load(file)
+    
+@st.cache_resource
+def load_index_dict():
+    with open("index_id_map.json", "r") as file:
         return json.load(file)
 
 def preprocess_text(text):
@@ -96,7 +101,7 @@ def preprocess_text(text):
 
     return ' '.join(lemmatized_words)
 
-def perform_similarity_search(query, model, index, df, k):
+def perform_similarity_search(query, model, index, df, k, collection):
     """Perform similarity search using FAISS."""
     # Correct spelling and preprocess query
     processed_query = preprocess_text(query)
@@ -108,16 +113,36 @@ def perform_similarity_search(query, model, index, df, k):
     distances, indices = index.search(query_embedding, k)
     
     # Collect results
+    # results = []
+    # for i, idx in enumerate(indices[0]):
+    #     result = {
+    #         "title": df.iloc[idx]["Title"],
+    #         "abstract": df.iloc[idx]["Abstract"],
+    #         "subject": df.iloc[idx]["Subject"],
+    #         "doi": df.iloc[idx].get("Doi", ""),
+    #         "distance": distances[0][i],
+    #     }
+    #     results.append(result)
+    # return results
+
     results = []
     for i, idx in enumerate(indices[0]):
-        result = {
-            "title": df.iloc[idx]["Title"],
-            "abstract": df.iloc[idx]["Abstract"],
-            "subject": df.iloc[idx]["Subject"],
-            "doi": df.iloc[idx].get("Doi", ""),
-            "distance": distances[0][i],
-        }
-        results.append(result)
+        # Get the MongoDB _id from df and convert to ObjectId
+        document_id = load_index_dict()[idx]
+        
+        # Query MongoDB to get the document by _id
+        document = collection.find_one({"_id": ObjectId(document_id)})
+        
+        # Prepare result with document details
+        if document:
+            result = {
+                "title": document.get("Title", ""),
+                "abstract": document.get("Abstract", ""),
+                "subject": document.get("Subject", ""),
+                "doi": document.get("Doi", ""),
+            }
+            results.append(result)
+    
     return results
 
 def apply_custom_css():
@@ -211,15 +236,12 @@ def format_subjects(subjects):
     
 #     return subject_author, subject_subject
 
-
-
-
 def main():
 
     apply_custom_css()
 
     # Load cached resources
-    df, subject_author, subject_subject = load_data()
+    df, subject_author, subject_subject, collection = load_data()
     index = load_faiss_index()
     model = load_model()
 
@@ -299,7 +321,7 @@ def main():
 
         if query:
             # Perform similarity search for the selected k value
-            results = perform_similarity_search(query, model, index, df, k)
+            results = perform_similarity_search(query, model, index, df, k, collection)
 
             st.markdown(f"<h2 style='margin-top: 20px;'>🔎 Recommended Papers ({k} results)</h2>", unsafe_allow_html=True)
             for result in results:
