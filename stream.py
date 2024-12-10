@@ -18,6 +18,12 @@ from nltk.corpus import stopwords
 import nltk
 import json
 from bson import ObjectId
+import networkx as nx
+from pyvis.network import Network
+import pydeck as pdk
+import tempfile
+from typing import Dict, Optional, Tuple
+from itertools import combinations
 
 @st.cache_resource
 def load_data():
@@ -30,28 +36,6 @@ def load_data():
     client = MongoClient(DATABASE_URL)  # Adjust the URI if necessary
     db = client["paperDB"]  # Replace with your MongoDB database name
     collection = db["paper"]  # Replace with your MongoDB collection name
-
-    # projection = {'Subject':1, 'Source_Date_Year':1, 'Authors':1, '_id': 0}
-
-    # # Fetch all documents from the collection
-    # papers = collection.find({}, projection) # You can apply queries if needed'
-
-    # # Convert MongoDB cursor to DataFrame
-    # df = pd.DataFrame(papers)
-
-    # subject_author = df[['Source_Date_Year', 'Authors']].explode(column='Authors').reset_index(drop=True)
-    # subject_author['Authors'] = subject_author['Authors'].apply(lambda x: x['Name'])
-    # subject_author = subject_author.groupby(['Source_Date_Year', 'Authors']).size().reset_index(name='Count')
-    # subject_author = subject_author.sort_values(by=['Source_Date_Year', 'Count'], ascending=[True, False]).reset_index(drop=True)
-
-    # # Subject data
-    # subject_subject = df[['Source_Date_Year', 'Subject', 'Authors']].explode(column='Authors').reset_index(drop=True)
-    # subject_subject['Authors'] = subject_subject['Authors'].apply(lambda x: x['Name'])
-    # subject_subject = subject_subject.explode(column='Subject')
-    # subject_subject = subject_subject.groupby(['Source_Date_Year', 'Subject']).size().reset_index(name='Count')
-    # subject_subject = subject_subject.sort_values(by=['Source_Date_Year', 'Count'], ascending=[True, False]).reset_index(drop=True)
-
-    # print("Load Data")
 
     subject_author = pd.read_pickle('subject_author.pkl')
     subject_subject = pd.read_pickle('subject_subject.pkl')
@@ -232,23 +216,171 @@ def format_subjects(subjects):
 
     return badges
 
-# def preprocess_author_data(df):
-#     """Preprocess data for authors and subjects."""
-#     # Author data
-#     subject_author = df[['Source_Date_Year', 'Authors']].explode(column='Authors').reset_index(drop=True)
-#     subject_author['Authors'] = subject_author['Authors'].apply(lambda x: x['Name'])
-#     subject_author = subject_author.groupby(['Source_Date_Year', 'Authors']).size().reset_index(name='Count')
-#     subject_author = subject_author.sort_values(by=['Source_Date_Year', 'Count'], ascending=[True, False]).reset_index(drop=True)
+@st.cache_data
+def load_city_country_coordinate_data():
+    return pd.read_csv('city_country_coordinate.csv')
 
-#     # Subject data
-#     subject_subject = df[['Source_Date_Year', 'Subject', 'Authors']].explode(column='Authors').reset_index(drop=True)
-#     subject_subject['Authors'] = subject_subject['Authors'].apply(lambda x: x['Name'])
-#     subject_subject = subject_subject.explode(column='Subject')
-#     subject_subject = subject_subject.groupby(['Source_Date_Year', 'Subject']).size().reset_index(name='Count')
-#     subject_subject = subject_subject.sort_values(by=['Source_Date_Year', 'Count'], ascending=[True, False]).reset_index(drop=True)
+@st.cache_data
+def load_coauthor_edges_data():
+    return pd.read_csv('coauthor_series.csv')
 
-    
-#     return subject_author, subject_subject
+def get_top_affiliation_coordinate_df(top_city_country_amount):
+    top_affiliation_df = load_city_country_coordinate_data().head(top_city_country_amount)
+    total_top_papers = sum(top_affiliation_df['papers'])
+    top_affiliation_df['papers'] = top_affiliation_df['papers'] / total_top_papers
+    top_affiliation_df.rename(columns={'papers':'local_paper_portions'}, inplace=True)
+    return top_affiliation_df
+
+def get_coauthor_series(edge_amount):
+    return load_coauthor_edges_data().head(edge_amount)
+
+class NetworkVisualizer:
+    def __init__(self, G: nx.Graph):
+        self.G = G
+        self.colors = [
+            "#e6194b", "#3cb44b", "#ffe119", "#4363d8", "#f58231", 
+            "#911eb4", "#46f0f0", "#f032e6", "#bcf60c", "#fabebe",
+            "#008080", "#e6beff", "#9a6324", "#fffac8", "#800000"
+        ]
+
+    def _get_layout(self, layout_type: str, G: nx.Graph, k_space: float = 2.0):
+        """Calculate layout positions with adjustable spacing"""
+        if layout_type == "spring":
+            k = 1/np.sqrt(len(G.nodes())) * k_space
+            return nx.spring_layout(G, k=k, iterations=50, seed=42)
+        elif layout_type == "kamada_kawai":
+            return nx.kamada_kawai_layout(G)
+        elif layout_type == "circular":
+            return nx.circular_layout(G)
+        elif layout_type == "random":
+            return nx.random_layout(G, seed=42)
+        else:
+            return nx.spring_layout(G)
+
+    def create_interactive_network(
+        self, 
+        communities: Optional[Dict] = None,
+        layout: str = "spring",
+        centrality_metric: str = "degree",
+        scale_factor: float = 1000,
+        node_spacing: float = 2.0,
+        node_size_range: Tuple[int, int] = (10, 50),
+        show_edges: bool = True, 
+        font_size: int = 14 
+    ) -> str:
+        # Get layout positions with adjustable spacing
+        pos = self._get_layout(layout, self.G, node_spacing)
+        
+        # Scale positions
+        pos = {node: (coord[0] * scale_factor, coord[1] * scale_factor) 
+               for node, coord in pos.items()}
+
+        # Calculate centrality
+        try:
+            if centrality_metric == "degree":
+                centrality = nx.degree_centrality(self.G)
+            elif centrality_metric == "betweenness":
+                centrality = nx.betweenness_centrality(self.G)
+            elif centrality_metric == "closeness":
+                centrality = nx.closeness_centrality(self.G)
+            else:  # pagerank
+                centrality = nx.pagerank(self.G)
+        except:
+            centrality = nx.degree_centrality(self.G)
+            st.warning(f"Failed to compute {centrality_metric} centrality, using degree centrality instead.")
+
+        # Scale node sizes
+        min_cent, max_cent = min(centrality.values()), max(centrality.values())
+        min_size, max_size = node_size_range
+        if max_cent > min_cent:
+            size_scale = lambda x: min_size + (x - min_cent) * (max_size - min_size) / (max_cent - min_cent)
+        else:
+            size_scale = lambda x: (min_size + max_size) / 2
+
+        # Create a copy of the graph to modify attributes
+        G_vis = self.G.copy()
+
+        # Prepare color map for communities if present
+        if communities:
+            unique_communities = sorted(set(communities.values()))
+            color_map = {com: self.colors[i % len(self.colors)] 
+                        for i, com in enumerate(unique_communities)}
+
+        # Set node attributes all at once
+        for node in G_vis.nodes():
+            G_vis.nodes[node].update({
+                'label': str(node),
+                'size': size_scale(centrality[node]),
+                'x': pos[node][0],
+                'y': pos[node][1],
+                'physics': False,
+                'title': (f"Node: {node}\nDegree: {self.G.degree(node)}\nCommunity: {communities[node]}"
+                         if communities else
+                         f"Node: {node}\nDegree: {self.G.degree(node)}"),
+                'color': color_map[communities[node]] if communities else None
+            })
+
+        # Create network
+        nt = Network(
+            height="720px",
+            width="100%",
+            bgcolor="#ffffff",
+            font_color="black",
+            directed=self.G.is_directed()
+        )
+
+        # Convert from networkx to pyvis
+        nt.from_nx(G_vis)
+        
+        # Disable physics
+        nt.toggle_physics(False)
+
+        # Set visualization options
+        nt.set_options("""
+        {
+            "nodes": {
+                "font": {"size": %d},
+                "borderWidth": 2,
+                "borderWidthSelected": 3,
+                "shape": "dot"
+            },
+            "edges": {
+                "color": {"color": "#666666"},
+                "width": 1.5,
+                "smooth": {
+                    "type": "continuous",
+                    "roundness": 0.5
+                },
+                "hidden": %s
+            },
+            "physics": {
+                "enabled": false
+            },
+            "interaction": {
+                "hover": true,
+                "multiselect": true,
+                "navigationButtons": true,
+                "tooltipDelay": 100,
+                "zoomView": true,
+                "dragView": true,
+                "zoomSpeed": 0.5,
+                "minZoom": 1.0,
+                "maxZoom": 2.5
+            }
+        }
+        """ % (font_size, str(not show_edges).lower()))
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.html', mode='w', encoding='utf-8') as tmp:
+            nt.save_graph(tmp.name)
+            return tmp.name
+        
+@st.cache_data
+def detect_communities(edges_str: str):
+    """Community detection"""
+    # Recreate graph from edges string
+    edges = eval(edges_str)
+    G = nx.Graph(edges)
+    return list(nx.community.greedy_modularity_communities(G))
 
 def main():
 
@@ -264,7 +396,7 @@ def main():
 
     st.sidebar.header('Analysis Controls')
 
-    tab = ui.tabs(options=["Paper Recommendation System", "Publications", "Trends Subject Area"], default_value="Paper Recommendation System", key="my_tab_state")
+    tab = ui.tabs(options=["Paper Recommendation System", "Publications", "Trends Subject Area", "Spatial Visualization", "Network Visualization"], default_value="Paper Recommendation System", key="my_tab_state")
     if tab == "Publications":
         st.header("Publications Frequency")
         slectNumber = st.sidebar.slider('Select Number of Authors:', min_value=5, max_value=20, value=10, key="pub_slider_state", step=1)
@@ -353,6 +485,132 @@ def main():
                     """,
                     unsafe_allow_html=True,
                 )
+    elif tab == "Visualization":
+        st.title("Data Visualization")
+
+        with st.sidebar: 
+            # Top Affiliation Sidebar
+            st.subheader("Top Affiliation Spatial Visualization")
+            top_city_country_amount = st.slider(
+                "Top (n) Authors' Affiliation City & Country", 
+                min_value=1, 
+                max_value=100, 
+                value=10
+            )
+            top_affiliation_coordinate_df = get_top_affiliation_coordinate_df(top_city_country_amount)
+
+            # Co-authorship Sidebar
+            st.subheader("Co-Author Network Visualization Options")
+            coauthor_edge_amount = st.slider(
+                "Co-authoship Edges Amount", 
+                min_value=1, 
+                max_value=500, 
+                step=1
+            )
+            coauthor_series = get_coauthor_series(coauthor_edge_amount)
+            G = nx.Graph()
+
+            for coauthor_edge in coauthor_series['Authors']:
+                coauthor_edge = eval(coauthor_edge)
+                G.add_edge(coauthor_edge[0], coauthor_edge[1])
+
+            layout_option = st.selectbox(
+                "Layout Algorithm",
+                ["spring", "kamada_kawai", "circular", "random"]
+            )
+            centrality_option = st.selectbox(
+                "Node Size By", 
+                ["degree", "betweenness", "closeness", "pagerank"]
+            )
+
+            # Size Controls
+            scale_factor = st.slider(
+                "Graph Size", 
+                min_value=500, 
+                max_value=3000, 
+                value=1000,
+                step=100,
+                help="Adjust the overall size of the graph"
+            )
+            if layout_option == "spring":
+                node_spacing = st.slider(
+                    "Node Spacing",
+                    min_value=1.0,
+                    max_value=20.0,
+                    value=5.0,
+                    step=1.0,
+                    help="Adjust the spacing between nodes (only for spring layout)"
+                )
+            else:
+                node_spacing = 2.0
+
+            node_size_range = st.slider(
+                "Node Size Range",
+                min_value=5,
+                max_value=200,
+                value=(10, 50),
+                step=5,
+                help="Set the minimum and maximum node sizes"
+            )
+            font_size = st.slider(
+                "Label Font Size",
+                min_value=8,
+                max_value=40,
+                value=16,
+                step=2,
+                help="Adjust the font size of node labels"
+            )
+            show_edges = st.toggle(
+                "Show Edges",
+                value=True,  
+                help="Toggle edge visibility"
+            )
+
+            show_communities = st.checkbox("Detect Communities")
+            communities = None
+
+            if show_communities:
+                try:
+                    edges_str = str(list(G.edges()))
+                    communities_iter = detect_communities(edges_str)
+                    communities = {node: idx for idx, community in enumerate(communities_iter) for node in community}
+                except Exception as e:
+                    st.warning(f"Could not detect communities: {str(e)}")
+
+        # Tabs for Spatial and Network Visualization
+        tab_spatial, tab_network = st.tabs(["Spatial Visualization", "Network Visualization"])
+
+        with tab_spatial:
+            st.header("Top Authors' Affiliation City & Country")
+            view_state = pdk.ViewState(latitude=0, longitude=0, zoom=1, pitch=0)
+            scatterplot_layer = pdk.Layer(
+                "ScatterplotLayer",
+                top_affiliation_coordinate_df,
+                get_position=['longitude', 'latitude'],
+                opacity=0.8,
+                get_radius=200000,
+                get_fill_color=[30, 0, 255],
+                pickable=True
+            )
+            st.pydeck_chart(pdk.Deck(layers=[scatterplot_layer], initial_view_state=view_state, map_style="light"))
+
+        with tab_network:
+            st.header("First 40 Papers Co-authorship Network Visualization")
+            network_visualizer = NetworkVisualizer(G)
+            html_file = network_visualizer.create_interactive_network(
+                communities=communities,
+                layout=layout_option,
+                centrality_metric=centrality_option,
+                scale_factor=scale_factor,
+                node_spacing=node_spacing,
+                node_size_range=node_size_range,
+                show_edges=show_edges,
+                font_size=font_size
+            )
+            with open(html_file, 'r', encoding='utf-8') as f:
+                html_content = f.read()
+            st.components.v1.html(html_content, height=800)
+            os.unlink(html_file)
 
 if __name__ == "__main__":
     main()

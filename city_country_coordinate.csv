@@ -1,0 +1,101 @@
+city_country,papers,latitude,longitude
+"Bangkok, Thailand",74592,13.7524938,100.4935089
+"Hamburg, Germany",58539,53.550341,10.000654
+"Geneva, Switzerland",57104,46.2017559,6.1466014
+"Batavia, United States",39800,40.9940985,-92.1674331
+"Turin, Italy",26497,45.0677551,7.6824892
+"Moscow, Russian Federation",26413,55.7505412,37.6174782
+"Aachen, Germany",25942,50.776351,6.083862
+"Bari, Italy",24714,41.1257843,16.8620293
+"London, United Kingdom",24226,51.5074456,-0.1277653
+"Bologna, Italy",23576,44.4938203,11.3426327
+"Seoul, South Korea",23524,37.5666791,126.9782914
+"Beijing, China",21557,39.9057136,116.3912972
+"Padua, Italy",21464,45.4077172,11.8734455
+"Karlsruhe, Germany",19919,49.0068705,8.4034195
+"Brussels, Belgium",19570,50.8465573,4.351697
+"Pisa, Italy",19502,43.7159395,10.4018624
+"Cambridge, United States",18886,42.3656347,-71.1040018
+"Zurich ZH,, Switzerland",18446,47.3744489,8.5410422
+"Vienna, Austria",18035,48.2083537,16.3725042
+"Gif-sur-Yvette, France",17804,48.7018823,2.134529
+"Madrid, Spain",15597,40.4167047,-3.7035825
+"Rome, Italy",15376,41.8933203,12.4829321
+"Rio de Janeiro, Brazil",15350,-22.9110137,-43.2093727
+"Boston, United States",14274,42.3554334,-71.060511
+"Mumbai, India",13308,19.0785451,72.878176
+"Villeurbanne, France",12929,45.7733573,4.8868454
+"Adana, Turkey",12898,36.9863599,35.3252861
+"Gainesville, United States",12882,29.6519684,-82.3249846
+"Madison, United States",12769,43.074761,-89.3837613
+"Davis, United States",12541,38.5435526,-121.739005
+"San Diego, United States",12312,32.7174202,-117.162772
+"Notre Dame, United States",12062,41.6992003,-86.2373691
+"Perugia, Italy",11786,43.1119613,12.3890104
+"Dubna, Russian Federation",11458,55.1221497,37.3436274
+"Zurich, Switzerland",11414,47.3744489,8.5410422
+"New Brunswick, United States",11348,40.4862174,-74.4518173
+"Lawrence, United States",11048,38.9719137,-95.2359403
+"Santander, Spain",10616,43.4620412,-3.8099719
+"Athens, Greece",10424,37.9755648,23.7348324
+"Chicago, United States",10368,41.8755616,-87.6244212
+"Helsinki, Finland",10205,60.1674881,24.9427473
+"Bristol, United Kingdom",10040,51.4538022,-2.5972985
+"West Lafayette, United States",9893,40.4258686,-86.9080655
+"Kolkata, India",9852,22.5726459,88.3638953
+"Didcot, United Kingdom",9796,51.6056908,-1.2467923
+"Providence, United States",9686,41.8239891,-71.4128343
+"Princeton, United States",9681,40.3496953,-74.6597376
+"Iowa City, United States",9656,41.6612561,-91.5299106
+"College Park, United States",9554,38.980666,-76.9369189
+"Louvain-la-Neuve, Belgium",9464,50.6682012,4.6128839
+"Naples, Italy",9204,40.8358846,14.2487679
+"Bicocca, Italy",9163,45.5151365,9.2122056
+"Ithaca, United States",8992,42.4396039,-76.4968019
+"Santa Barbara, United States",8924,34.4221319,-119.702667
+"Pavia, Italy",8876,45.1860043,9.1546375
+"Milan, Italy",8782,45.4641943,9.1896346
+"College Station, United States",8775,30.6183939,-96.3455991
+"Chandigarh, India",8573,30.7334421,76.7797143
+"Budapest, Hungary",8568,47.4978789,19.0402383
+"Istanbul, Turkey",8495,41.006381,28.9758715
+"Houston, United States",8370,29.7589382,-95.3676974
+"Riverside, United States",8239,33.9824949,-117.374238
+"Strasbourg, France",8079,48.584614,7.7507127
+"Lisbon, Portugal",7421,38.7077507,-9.1365919
+"Pasadena, United States",7384,34.1476507,-118.144155
+"Rochester, United States",7289,43.157285,-77.615214
+"Protvino, Russian Federation",7220,54.8707703,37.2188629
+"Minneapolis, United States",7214,44.9772995,-93.2654692
+"Taipei, Taiwan",7102,25.0375198,121.5636796
+"Los Angeles, United States",7052,34.0536909,-118.242766
+"Lubbock, United States",6953,33.5855677,-101.8470215
+"Tallahassee, United States",6947,30.4380832,-84.2809332
+"Sofia, Bulgaria",6890,42.6977028,23.3217359
+"Baltimore, United States",6739,39.2908816,-76.610759
+"Nashville, United States",6649,36.1622767,-86.7742984
+"Daegu, South Korea",6568,35.8713,128.6018
+"Lincoln, United States",6545,40.8088861,-96.7077751
+"Charlottesville, United States",6375,38.029306,-78.4766781
+"Ghent, Belgium",6292,51.0538286,3.7250121
+"Gatchina, Russian Federation",6211,59.5706273,30.1305083
+"New Delhi, India",6193,28.6138954,77.2090057
+"Sesto Fiorentino, Italy",6131,43.831721,11.1992239
+"Nicosia, Cyprus",5948,35.1746503,33.3638783
+"Catania, Italy",5940,37.5023612,15.0873718
+"Columbus, United States",5871,39.9622601,-83.0007065
+"Debrecen, Hungary",5733,47.531399,21.6259782
+"Palaiseau, France",5686,48.7144587,2.2453842
+"Ioannina, Greece",5671,39.6639818,20.8522784
+"Oviedo, Spain",5608,43.3618625,-5.8483581
+"Mexico, Mexico",5595,30.9908448,-108.1504011
+"Boulder, United States",5288,40.0149856,-105.270545
+"Trieste, Italy",5242,45.6496485,13.7772781
+"Villigen, Switzerland",5211,47.5262684,8.2147282
+"Bhubaneswar, India",5168,20.2602964,85.8394521
+"Evanston, United States",4963,42.0470043,-87.6846053
+"Antwerpen, Belgium",4927,51.2211097,4.3997081
+"Warsaw, Poland",4858,52.2319581,21.0067249
+"Buffalo, United States",4834,42.8867166,-78.8783922
+"Islamabad, Pakistan",4773,33.6938118,73.0651511
+"Waco, United States",4612,31.5491899,-97.1474628
