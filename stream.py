@@ -423,8 +423,6 @@ def main():
         st.subheader("Table of Top Authors")
         ui.table(data=subject_author[subject_author["Source_Date_Year"] == selectYear][["Authors", "Source_Date_Year", "Count"]].head(slectNumber), maxHeight=300)
 
-
-    
     elif tab == "Trends Subject Area":
         st.header("Author Publication Trends and Frequencies")
         slectNumber = st.sidebar.slider('Select Number of Subjects:', min_value=5, max_value=20, value=10, key="trends_slider_state", step=1)
@@ -582,7 +580,11 @@ def main():
 
         with tab_spatial:
             st.header("Top Authors' Affiliation City & Country")
+
+            st.subheader('Scatter Plot Spatial Analysis')
+
             view_state = pdk.ViewState(latitude=0, longitude=0, zoom=1, pitch=0)
+
             scatterplot_layer = pdk.Layer(
                 "ScatterplotLayer",
                 top_affiliation_coordinate_df,
@@ -592,8 +594,33 @@ def main():
                 get_fill_color=[30, 0, 255],
                 pickable=True
             )
+
             st.pydeck_chart(pdk.Deck(layers=[scatterplot_layer], initial_view_state=view_state, map_style="light"))
 
+            st.subheader('Heatmap Spatial Analysis')
+            heatmap_layer = pdk.Layer(
+                "HeatmapLayer",
+                top_affiliation_coordinate_df,
+                get_position=['longitude', 'latitude'],
+                opacity=0.8,
+                get_weight="local_paper_portions",
+                color_range=[
+                    [150, 150, 200],
+                    [80, 80, 200],
+                    [60, 60, 225],
+                    [30, 0, 255]
+                ],
+                pickable=True
+            )
+
+            st.pydeck_chart(pdk.Deck(layers=[heatmap_layer], initial_view_state=view_state, map_style="light"))
+
+            st.header('Top Affiliation City & Country Table')
+            top_affiliation_table = top_affiliation_coordinate_df.copy()
+            top_affiliation_table.rename(columns={'local_paper_portions':'papers'}, inplace=True)
+            top_affiliation_table['papers'] = top_affiliation_table['papers'] * sum(load_city_country_coordinate_data().head(top_city_country_amount)['papers'])
+            st.dataframe(top_affiliation_table)
+            
         with tab_network:
             st.header("First 40 Papers Co-authorship Network Visualization")
             network_visualizer = NetworkVisualizer(G)
