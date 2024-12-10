@@ -566,7 +566,7 @@ def main():
             )
 
             show_communities = st.checkbox("Detect Communities")
-            communities = None
+            communities = True
 
             if show_communities:
                 try:
