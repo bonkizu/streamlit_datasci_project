@@ -5,3 +5,4 @@ nltk
 pymongo
 python-dotenv
 streamlit-shadcn-ui
+streamlit
