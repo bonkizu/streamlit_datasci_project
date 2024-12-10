@@ -503,6 +503,7 @@ def main():
                 "Co-authoship Edges Amount", 
                 min_value=1, 
                 max_value=500, 
+                value=200,
                 step=1
             )
             coauthor_series = get_coauthor_series(coauthor_edge_amount)
@@ -620,7 +621,7 @@ def main():
             top_affiliation_table.rename(columns={'local_paper_portions':'papers'}, inplace=True)
             top_affiliation_table['papers'] = top_affiliation_table['papers'] * sum(load_city_country_coordinate_data().head(top_city_country_amount)['papers'])
             st.dataframe(top_affiliation_table)
-            
+
         with tab_network:
             st.header("First 40 Papers Co-authorship Network Visualization")
             network_visualizer = NetworkVisualizer(G)
