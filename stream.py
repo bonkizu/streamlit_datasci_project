@@ -53,7 +53,37 @@ def load_data():
 
     # print("Load Data")
 
-    subject_author = pd.read_pickle('subject_author.pkl')
+    pipeline = [
+        {
+            "$unwind": "$Authors"  # Step 1: Explode the 'Authors' array
+        },
+        {
+            "$project": {
+                "Source_Date_Year": 1,  # Include the year field
+                "Authors": "$Authors.Name"  # Project the 'Name' from the Authors subdocument
+            }
+        },
+        {
+            "$group": {
+                "_id": { "Source_Date_Year": "$Source_Date_Year", "Authors": "$Authors" },  # Group by year and author
+                "Count": { "$sum": 1 }  # Count the occurrences
+            }
+        },
+        {
+            "$sort": { "Source_Date_Year": 1, "Count": -1 }  # Sort by year ascending, count descending
+        },
+        {
+            "$project": {
+                "Source_Date_Year": "$_id.Source_Date_Year",
+                "Authors": "$_id.Authors",
+                "Count": 1,  # Include the count in the output
+                "_id": 0  # Exclude the default _id field
+            }
+        }
+    ]
+
+    # subject_author = pd.read_pickle('subject_author.pkl')
+    subject_author = pd.DataFrame(list(collection.aggregate(pipeline)))
     subject_subject = pd.read_pickle('subject_subject.pkl')
     year_counts = pd.read_pickle('year_counts.pkl')
 
