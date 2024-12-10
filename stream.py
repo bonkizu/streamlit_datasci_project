@@ -279,7 +279,7 @@ def main():
             with col:
                 data = subject_author[subject_author['Source_Date_Year'] == year]
                 fig = px.bar(data.head(8), x="Authors", y="Count", color="Source_Date_Year", color_discrete_sequence=[colors[i]])
-                st.plotly_chart(fig)
+                st.plotly_chart(fig, key=year)
         
         st.subheader("Table of Top Authors")
         ui.table(data=subject_author[subject_author["Source_Date_Year"] == selectYear][["Authors", "Source_Date_Year", "Count"]].head(slectNumber), maxHeight=300)
@@ -304,7 +304,7 @@ def main():
                 with col:
                     data = subject_subject[subject_subject['Source_Date_Year'] == year]
                     fig = px.bar(data.head(8), x="Subject", y="Count", color="Source_Date_Year", color_discrete_sequence=[colors[i]])
-                    st.plotly_chart(fig)
+                    st.plotly_chart(fig, key=year)
 
         st.subheader("Table of Top Subjects")
         ui.table(data=subject_subject[subject_subject["Source_Date_Year"] == selectYear][["Subject", "Source_Date_Year", "Count"]].head(slectNumber), maxHeight=300)
