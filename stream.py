@@ -46,7 +46,19 @@ def load_data():
     # Convert MongoDB cursor to DataFrame
     df = pd.DataFrame(papers)
 
-    return df
+    subject_author = df[['Source_Date_Year', 'Authors']].explode(column='Authors').reset_index(drop=True)
+    subject_author['Authors'] = subject_author['Authors'].apply(lambda x: x['Name'])
+    subject_author = subject_author.groupby(['Source_Date_Year', 'Authors']).size().reset_index(name='Count')
+    subject_author = subject_author.sort_values(by=['Source_Date_Year', 'Count'], ascending=[True, False]).reset_index(drop=True)
+
+    # Subject data
+    subject_subject = df[['Source_Date_Year', 'Subject', 'Authors']].explode(column='Authors').reset_index(drop=True)
+    subject_subject['Authors'] = subject_subject['Authors'].apply(lambda x: x['Name'])
+    subject_subject = subject_subject.explode(column='Subject')
+    subject_subject = subject_subject.groupby(['Source_Date_Year', 'Subject']).size().reset_index(name='Count')
+    subject_subject = subject_subject.sort_values(by=['Source_Date_Year', 'Count'], ascending=[True, False]).reset_index(drop=True)
+
+    return df, subject_author, subject_subject
 
 # Cache FAISS index and SentenceTransformer model (global resources)
 @st.cache_resource
@@ -182,24 +194,23 @@ def format_subjects(subjects):
 
     return badges
 
-@st.cache_data
-def preprocess_author_data(df):
-    """Preprocess data for authors and subjects."""
-    # Author data
-    subject_author = df[['Source_Date_Year', 'Authors']].explode(column='Authors').reset_index(drop=True)
-    subject_author['Authors'] = subject_author['Authors'].apply(lambda x: x['Name'])
-    subject_author = subject_author.groupby(['Source_Date_Year', 'Authors']).size().reset_index(name='Count')
-    subject_author = subject_author.sort_values(by=['Source_Date_Year', 'Count'], ascending=[True, False]).reset_index(drop=True)
+# def preprocess_author_data(df):
+#     """Preprocess data for authors and subjects."""
+#     # Author data
+#     subject_author = df[['Source_Date_Year', 'Authors']].explode(column='Authors').reset_index(drop=True)
+#     subject_author['Authors'] = subject_author['Authors'].apply(lambda x: x['Name'])
+#     subject_author = subject_author.groupby(['Source_Date_Year', 'Authors']).size().reset_index(name='Count')
+#     subject_author = subject_author.sort_values(by=['Source_Date_Year', 'Count'], ascending=[True, False]).reset_index(drop=True)
 
-    # Subject data
-    subject_subject = df[['Source_Date_Year', 'Subject', 'Authors']].explode(column='Authors').reset_index(drop=True)
-    subject_subject['Authors'] = subject_subject['Authors'].apply(lambda x: x['Name'])
-    subject_subject = subject_subject.explode(column='Subject')
-    subject_subject = subject_subject.groupby(['Source_Date_Year', 'Subject']).size().reset_index(name='Count')
-    subject_subject = subject_subject.sort_values(by=['Source_Date_Year', 'Count'], ascending=[True, False]).reset_index(drop=True)
+#     # Subject data
+#     subject_subject = df[['Source_Date_Year', 'Subject', 'Authors']].explode(column='Authors').reset_index(drop=True)
+#     subject_subject['Authors'] = subject_subject['Authors'].apply(lambda x: x['Name'])
+#     subject_subject = subject_subject.explode(column='Subject')
+#     subject_subject = subject_subject.groupby(['Source_Date_Year', 'Subject']).size().reset_index(name='Count')
+#     subject_subject = subject_subject.sort_values(by=['Source_Date_Year', 'Count'], ascending=[True, False]).reset_index(drop=True)
 
     
-    return subject_author, subject_subject
+#     return subject_author, subject_subject
 
 
 def main():
@@ -207,13 +218,11 @@ def main():
     apply_custom_css()
 
     # Load cached resources
-    df = load_data()
+    df, subject_author, subject_subject = load_data()
     index = load_faiss_index()
     model = load_model()
 
     st.sidebar.header('Analysis Controls')
-
-    subject_author, subject_subject = preprocess_author_data(df)
 
     tab = ui.tabs(options=["Paper Recommendation System", "Publications", "Trends Subject Area"], default_value="Paper Recommendation System", key="my_tab_state")
     if tab == "Publications":
