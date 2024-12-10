@@ -454,7 +454,7 @@ def main():
 
 
         # Query input
-        query = st.text_input("🔍 Enter your research query:")
+        query = st.text_input("🔍 Enter your research query:", value="Healthcare")
         
         # Checkboxes for number of results to display
         # k = st.radio(
