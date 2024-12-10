@@ -82,8 +82,11 @@ def load_data():
         }
     ]
 
-    # subject_author = pd.read_pickle('subject_author.pkl')
-    subject_author = pd.DataFrame(list(collection.aggregate(pipeline)))
+    results = collection.aggregate(pipeline)
+
+    print(results)
+
+    subject_author = pd.read_pickle('subject_author.pkl')
     subject_subject = pd.read_pickle('subject_subject.pkl')
     year_counts = pd.read_pickle('year_counts.pkl')
 
