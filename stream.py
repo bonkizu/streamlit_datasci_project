@@ -125,10 +125,13 @@ def perform_similarity_search(query, model, index, df, k, collection):
     #     results.append(result)
     # return results
 
+    index_dict = load_index_dict()
+
     results = []
     for i, idx in enumerate(indices[0]):
         # Get the MongoDB _id from df and convert to ObjectId
-        document_id = load_index_dict()[0]
+        print(index_dict)
+        document_id = index_dict[0]
         
         # Query MongoDB to get the document by _id
         document = collection.find_one({"_id": ObjectId(document_id)})
