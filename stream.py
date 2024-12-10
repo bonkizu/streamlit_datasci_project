@@ -31,29 +31,32 @@ def load_data():
     db = client["paperDB"]  # Replace with your MongoDB database name
     collection = db["paper"]  # Replace with your MongoDB collection name
 
-    projection = {'Subject':1, 'Source_Date_Year':1, 'Authors':1, '_id': 0}
+    # projection = {'Subject':1, 'Source_Date_Year':1, 'Authors':1, '_id': 0}
 
-    # Fetch all documents from the collection
-    papers = collection.find({}, projection).limit(1000) # You can apply queries if needed'
+    # # Fetch all documents from the collection
+    # papers = collection.find({}, projection) # You can apply queries if needed'
 
-    # Convert MongoDB cursor to DataFrame
-    df = pd.DataFrame(papers)
+    # # Convert MongoDB cursor to DataFrame
+    # df = pd.DataFrame(papers)
 
-    subject_author = df[['Source_Date_Year', 'Authors']].explode(column='Authors').reset_index(drop=True)
-    subject_author['Authors'] = subject_author['Authors'].apply(lambda x: x['Name'])
-    subject_author = subject_author.groupby(['Source_Date_Year', 'Authors']).size().reset_index(name='Count')
-    subject_author = subject_author.sort_values(by=['Source_Date_Year', 'Count'], ascending=[True, False]).reset_index(drop=True)
+    # subject_author = df[['Source_Date_Year', 'Authors']].explode(column='Authors').reset_index(drop=True)
+    # subject_author['Authors'] = subject_author['Authors'].apply(lambda x: x['Name'])
+    # subject_author = subject_author.groupby(['Source_Date_Year', 'Authors']).size().reset_index(name='Count')
+    # subject_author = subject_author.sort_values(by=['Source_Date_Year', 'Count'], ascending=[True, False]).reset_index(drop=True)
 
-    # Subject data
-    subject_subject = df[['Source_Date_Year', 'Subject', 'Authors']].explode(column='Authors').reset_index(drop=True)
-    subject_subject['Authors'] = subject_subject['Authors'].apply(lambda x: x['Name'])
-    subject_subject = subject_subject.explode(column='Subject')
-    subject_subject = subject_subject.groupby(['Source_Date_Year', 'Subject']).size().reset_index(name='Count')
-    subject_subject = subject_subject.sort_values(by=['Source_Date_Year', 'Count'], ascending=[True, False]).reset_index(drop=True)
+    # # Subject data
+    # subject_subject = df[['Source_Date_Year', 'Subject', 'Authors']].explode(column='Authors').reset_index(drop=True)
+    # subject_subject['Authors'] = subject_subject['Authors'].apply(lambda x: x['Name'])
+    # subject_subject = subject_subject.explode(column='Subject')
+    # subject_subject = subject_subject.groupby(['Source_Date_Year', 'Subject']).size().reset_index(name='Count')
+    # subject_subject = subject_subject.sort_values(by=['Source_Date_Year', 'Count'], ascending=[True, False]).reset_index(drop=True)
 
-    print("Load Data")
+    # print("Load Data")
 
-    return df, subject_author, subject_subject, collection
+    subject_author = pd.read_pickle('subject_author.pkl')
+    subject_subject = pd.read_pickle('subject_subject.pkl')
+
+    return subject_author, subject_subject, collection
 
 # Cache FAISS index and SentenceTransformer model (global resources)
 @st.cache_resource
@@ -103,7 +106,7 @@ def preprocess_text(text):
 
     return ' '.join(lemmatized_words)
 
-def perform_similarity_search(query, model, index, df, k, collection):
+def perform_similarity_search(query, model, index, k, collection):
     """Perform similarity search using FAISS."""
     # Correct spelling and preprocess query
     processed_query = preprocess_text(query)
@@ -245,7 +248,7 @@ def main():
     apply_custom_css()
 
     # Load cached resources
-    df, subject_author, subject_subject, collection = load_data()
+    subject_author, subject_subject, collection = load_data()
     index = load_faiss_index()
     model = load_model()
 
@@ -261,7 +264,7 @@ def main():
         selectYear = st.sidebar.selectbox("Select Year", options=subject_author["Source_Date_Year"].unique(), key="pub_selectbox_state")
 
         st.subheader("Number of Publications each Year")
-        fig = px.histogram(df, x="Source_Date_Year", nbins=15, labels={
+        fig = px.histogram(subject_author, x="Source_Date_Year", nbins=15, labels={
             "Source_Date_Year": "Year of Publication",
             "count": "Frequency of Publications"
         })
@@ -325,7 +328,7 @@ def main():
 
         if query:
             # Perform similarity search for the selected k value
-            results = perform_similarity_search(query, model, index, df, k, collection)
+            results = perform_similarity_search(query, model, index, k, collection)
 
             st.markdown(f"<h2 style='margin-top: 20px;'>🔎 Recommended Papers ({k} results)</h2>", unsafe_allow_html=True)
             for result in results:
