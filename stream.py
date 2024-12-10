@@ -31,7 +31,7 @@ def load_data():
     db = client["paperDB"]  # Replace with your MongoDB database name
     collection = db["paper"]  # Replace with your MongoDB collection name
 
-    projection = {'Source_Date_Year':1, 'Authors':1, '_id': 0}
+    projection = {'Subject':1, 'Source_Date_Year':1, 'Authors':1, '_id': 0}
 
     # Fetch all documents from the collection
     papers = collection.find({}, projection) # You can apply queries if needed'
