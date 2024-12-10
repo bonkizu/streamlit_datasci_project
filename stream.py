@@ -55,8 +55,9 @@ def load_data():
 
     subject_author = pd.read_pickle('subject_author.pkl')
     subject_subject = pd.read_pickle('subject_subject.pkl')
+    year_counts = pd.read_pickle('year_counts.pkl')
 
-    return subject_author, subject_subject, collection
+    return subject_author, subject_subject, year_counts, collection
 
 # Cache FAISS index and SentenceTransformer model (global resources)
 @st.cache_resource
@@ -248,7 +249,7 @@ def main():
     apply_custom_css()
 
     # Load cached resources
-    subject_author, subject_subject, collection = load_data()
+    subject_author, subject_subject, year_counts, collection = load_data()
     index = load_faiss_index()
     model = load_model()
 
@@ -264,7 +265,7 @@ def main():
         selectYear = st.sidebar.selectbox("Select Year", options=subject_author["Source_Date_Year"].unique(), key="pub_selectbox_state")
 
         st.subheader("Number of Publications each Year")
-        fig = px.histogram(subject_subject, x="Source_Date_Year", nbins=15, labels={
+        fig = px.histogram(year_counts, x="Source_Date_Year", nbins=15, labels={
             "Source_Date_Year": "Year of Publication",
             "count": "Frequency of Publications"
         })
