@@ -565,8 +565,8 @@ def main():
                 help="Toggle edge visibility"
             )
 
-            show_communities = st.checkbox("Detect Communities")
-            communities = True
+            show_communities = st.checkbox("Detect Communities", value=True)
+            communities = None
 
             if show_communities:
                 try:
