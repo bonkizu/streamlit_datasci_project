@@ -454,16 +454,16 @@ def main():
 
 
         # Query input
-        query = st.text_input("🔍 Enter your research query:", placeholder="e.g., 'AI in healthcare', 'Machine learning for climate change'...")
+        query = st.text_input("🔍 Enter your research query:", placeholder="e.g., 'AI in healthcare' or 'Advancements in machine learning'...")
 
         query_message = st.empty()  # Placeholder for message below search bar
         if not query:
             query_message.markdown(
                 """
-                <div style="text-align: center; color: #999; font-size: 16px; font-style: italic;">
-                    🧐 Looking for something specific? 
-                    <br>
-                    Try searching for a topic like 'AI in healthcare' or 'Machine learning research'.
+                <div style="text-align: center; color: #777; font-size: 16px; font-style: italic;">
+                🤔 Need inspiration? 
+                <br>
+                Search for exciting topics like 'AI in healthcare', 'Deep learning breakthroughs', or 'Natural language processing innovations'.
                 </div>
                 """, 
                 unsafe_allow_html=True
