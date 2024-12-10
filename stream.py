@@ -212,6 +212,9 @@ def format_subjects(subjects):
     
 #     return subject_author, subject_subject
 
+years = ["2018", "2019", "2020", "2021", "2022", "2023"]
+colors = ['#FF0000', '#FF8000', '#0000FF', '#FF3399', '#00CCCC', '#D1C62B']
+
 
 def main():
 
@@ -241,8 +244,6 @@ def main():
         st.subheader("Top Authors with Most Publications")
         col1, col2, col3 = st.columns(3)
 
-        years = ["2018", "2019", "2020", "2021", "2022", "2023"]
-        colors = ['#FF0000', '#FF8000', '#0000FF', '#FF3399', '#00CCCC', '#D1C62B']
         for i, year in enumerate(years):
             col = [col1, col2, col3][i % 3]
             with col:
