@@ -454,7 +454,7 @@ def main():
 
 
         # Query input
-        query = st.text_input("🔍 Enter your research query:", placeholder="e.g., 'AI in healthcare' or 'Machine learning techniques'...")
+        query = st.text_input("🔍 Enter your research query:", placeholder="e.g., 'AI in healthcare' or 'Sustainable energy'...")
 
         query_message = st.empty()  # Placeholder for message below search bar
         if not query:
@@ -463,7 +463,7 @@ def main():
                 <div style="text-align: center; color: #777; font-size: 16px; font-style: italic;">
                     🤔 Not sure where to start? 
                     <br>
-                    Try searching for something like 'AI in healthcare' or 'Machine learning methods'.
+                    Try searching for something like 'AI in healthcare' or 'Sustainable energy'.
                 </div>
                 """, 
                 unsafe_allow_html=True
