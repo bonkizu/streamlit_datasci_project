@@ -264,7 +264,7 @@ def main():
         selectYear = st.sidebar.selectbox("Select Year", options=subject_author["Source_Date_Year"].unique(), key="pub_selectbox_state")
 
         st.subheader("Number of Publications each Year")
-        fig = px.histogram(subject_author, x="Source_Date_Year", nbins=15, labels={
+        fig = px.histogram(subject_subject, x="Source_Date_Year", nbins=15, labels={
             "Source_Date_Year": "Year of Publication",
             "count": "Frequency of Publications"
         })
