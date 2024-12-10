@@ -489,11 +489,11 @@ def main():
                     """,
                     unsafe_allow_html=True,
                 )
-    elif tab == "Visualization":
-        st.title("Data Visualization")
+    elif tab == "Spatial Visualization":
+        st.title("Spatial Data Visualization")
 
         with st.sidebar: 
-            # Top Affiliation Sidebar
+            # Top Affiliation Sidebar for Spatial Visualization
             st.subheader("Top Affiliation Spatial Visualization")
             top_city_country_amount = st.slider(
                 "Top (n) Authors' Affiliation City & Country", 
@@ -503,10 +503,64 @@ def main():
             )
             top_affiliation_coordinate_df = get_top_affiliation_coordinate_df(top_city_country_amount)
 
-            # Co-authorship Sidebar
+        # Spatial Visualization
+        st.header("Top Authors' Affiliation City & Country")
+
+        # Scatter Plot
+        with st.expander('Scatter Plot Spatial Analysis'):
+            st.subheader('Scatter Plot Spatial Analysis')
+
+            view_state = pdk.ViewState(latitude=0, longitude=0, zoom=1, pitch=0)
+
+            scatterplot_layer = pdk.Layer(
+                "ScatterplotLayer",
+                top_affiliation_coordinate_df,
+                get_position=['longitude', 'latitude'],
+                opacity=0.8,
+                get_radius=200000,
+                get_fill_color=[30, 0, 255],
+                pickable=True
+            )
+
+            st.pydeck_chart(pdk.Deck(layers=[scatterplot_layer], initial_view_state=view_state, map_style="light"))
+
+        # Heatmap
+        with st.expander('Heatmap Spatial Analysis'):
+            st.subheader('Heatmap Spatial Analysis')
+
+            heatmap_layer = pdk.Layer(
+                "HeatmapLayer",
+                top_affiliation_coordinate_df,
+                get_position=['longitude', 'latitude'],
+                opacity=0.8,
+                get_weight="local_paper_portions",
+                color_range=[
+                    [150, 150, 200],
+                    [80, 80, 200],
+                    [60, 60, 225],
+                    [30, 0, 255]
+                ],
+                pickable=True
+            )
+
+            st.pydeck_chart(pdk.Deck(layers=[heatmap_layer], initial_view_state=view_state, map_style="light"))
+
+        # Top Affiliation Table
+        st.header('Top Affiliation City & Country Table')
+        top_affiliation_table = top_affiliation_coordinate_df.copy()
+        top_affiliation_table.rename(columns={'local_paper_portions':'papers'}, inplace=True)
+        top_affiliation_table['papers'] = top_affiliation_table['papers'] * sum(load_city_country_coordinate_data().head(top_city_country_amount)['papers'])
+        st.dataframe(top_affiliation_table)
+
+
+    elif tab == "Network Visualization":
+        st.title("Co-Authorship Network Visualization")
+
+        with st.sidebar:
+            # Co-authorship Sidebar for Network Visualization
             st.subheader("Co-Author Network Visualization Options")
             coauthor_edge_amount = st.slider(
-                "Co-authoship Edges Amount", 
+                "Co-authorship Edges Amount", 
                 min_value=1, 
                 max_value=500, 
                 value=200,
@@ -582,69 +636,25 @@ def main():
                 except Exception as e:
                     st.warning(f"Could not detect communities: {str(e)}")
 
-        # Tabs for Spatial and Network Visualization
-        tab_spatial, tab_network = st.tabs(["Spatial Visualization", "Network Visualization"])
+        # Network Visualization
+        st.header("First 40 Papers Co-authorship Network Visualization")
+        network_visualizer = NetworkVisualizer(G)
+        html_file = network_visualizer.create_interactive_network(
+            communities=communities,
+            layout=layout_option,
+            centrality_metric=centrality_option,
+            scale_factor=scale_factor,
+            node_spacing=node_spacing,
+            node_size_range=node_size_range,
+            show_edges=show_edges,
+            font_size=font_size
+        )
+        with open(html_file, 'r', encoding='utf-8') as f:
+            html_content = f.read()
+        st.components.v1.html(html_content, height=800)
+        os.unlink(html_file)
 
-        with tab_spatial:
-            st.header("Top Authors' Affiliation City & Country")
 
-            st.subheader('Scatter Plot Spatial Analysis')
-
-            view_state = pdk.ViewState(latitude=0, longitude=0, zoom=1, pitch=0)
-
-            scatterplot_layer = pdk.Layer(
-                "ScatterplotLayer",
-                top_affiliation_coordinate_df,
-                get_position=['longitude', 'latitude'],
-                opacity=0.8,
-                get_radius=200000,
-                get_fill_color=[30, 0, 255],
-                pickable=True
-            )
-
-            st.pydeck_chart(pdk.Deck(layers=[scatterplot_layer], initial_view_state=view_state, map_style="light"))
-
-            st.subheader('Heatmap Spatial Analysis')
-            heatmap_layer = pdk.Layer(
-                "HeatmapLayer",
-                top_affiliation_coordinate_df,
-                get_position=['longitude', 'latitude'],
-                opacity=0.8,
-                get_weight="local_paper_portions",
-                color_range=[
-                    [150, 150, 200],
-                    [80, 80, 200],
-                    [60, 60, 225],
-                    [30, 0, 255]
-                ],
-                pickable=True
-            )
-
-            st.pydeck_chart(pdk.Deck(layers=[heatmap_layer], initial_view_state=view_state, map_style="light"))
-
-            st.header('Top Affiliation City & Country Table')
-            top_affiliation_table = top_affiliation_coordinate_df.copy()
-            top_affiliation_table.rename(columns={'local_paper_portions':'papers'}, inplace=True)
-            top_affiliation_table['papers'] = top_affiliation_table['papers'] * sum(load_city_country_coordinate_data().head(top_city_country_amount)['papers'])
-            st.dataframe(top_affiliation_table)
-
-        with tab_network:
-            st.header("First 40 Papers Co-authorship Network Visualization")
-            network_visualizer = NetworkVisualizer(G)
-            html_file = network_visualizer.create_interactive_network(
-                communities=communities,
-                layout=layout_option,
-                centrality_metric=centrality_option,
-                scale_factor=scale_factor,
-                node_spacing=node_spacing,
-                node_size_range=node_size_range,
-                show_edges=show_edges,
-                font_size=font_size
-            )
-            with open(html_file, 'r', encoding='utf-8') as f:
-                html_content = f.read()
-            st.components.v1.html(html_content, height=800)
-            os.unlink(html_file)
 
 if __name__ == "__main__":
     main()
